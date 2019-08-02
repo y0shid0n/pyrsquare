@@ -53,11 +53,16 @@ def table_to_pd(table):
     # 単位のカラムが分かれてる場合とそうでない場合があるので分岐
     col_num_list = [len(i) for i in result_list]
     if col_num_list.count(max(col_num_list)) == len(col_num_list):
+        # 単位が分かれていなければそのまま
         result_df = pd.DataFrame(result_list[1:], columns=result_list[0])
     else:
+        # 単位のカラム名が分かれている場合はカラム名をつける
         result_list[0].insert(2, result_list[0][1] + "_unit")
         result_list[0].append(result_list[0][-1] + "_unit")
         result_df = pd.DataFrame(result_list[1:], columns=result_list[0])
+        # 単位のカラムから不要な文字列を削除
+        result_df.iloc[:, 2] = result_df.iloc[:, 2].str.replace("〃", "").str.strip()
+        result_df.iloc[:, -1] = result_df.iloc[:, -1].str.replace("〃", "").str.strip()
 
     # カラム名の全角半角の揺れをなくす
     result_df.columns = [jaconv.z2h(i, digit=True, ascii=True, kana=False) for i in result_df.columns]
@@ -73,12 +78,13 @@ def get_unit(str):
     値の文字列から単位を取得する
     マッチしないNoneTypeのときは空文字を返す
     """
-    output = re.search("(?<=[0-9])[^0-9]+$", str)
+    ptn = re.search("(?<=[0-9])[^0-9]+$", str)
 
-    if output is None:
+    if ptn is None:
         return ""
     else:
-        return output.group(0)
+        output = ptn.group(0).replace("〃", "").strip()
+        return output
 
 def get_value(str):
     """
