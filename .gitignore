@@ -1,0 +1,16 @@
+# Rstudio
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+# jupyter
+.ipynb_checkpoints/*
+
+# data
+data/*
+!data/.gitkeep
+
+# output
+output/*
+!output/.gitkeep
