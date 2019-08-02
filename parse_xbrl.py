@@ -46,7 +46,7 @@ for file in file_list:
         if len(df.columns) == 6:
             df.loc[:, df.columns.str.contains("_unit")] = df.loc[:, df.columns.str.contains("_unit")].apply(myfunc.fill_unit)
             # 値のカラム
-            collist_val = [i for i in df.columns if re.search(colname_tmp + ".*(?!_unit$)", i)]
+            collist_val = [i for i in df.columns[df.columns.str.contains(colname_tmp)] if re.search("^.*(?<!_unit)$", i)]
             df.loc[:, collist_val] = df.loc[:, collist_val].applymap(myfunc.get_value)
 
         # dfが4列の場合は単位の分離を行う
