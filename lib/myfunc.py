@@ -79,7 +79,8 @@ def table_to_pd(table):
         result_df.iloc[:, -1] = result_df.iloc[:, -1].str.replace("〃", "").str.strip()
 
     # カラム名の全角半角の揺れをなくす
-    result_df.columns = [jaconv.z2h(i, digit=True, ascii=True, kana=False) for i in result_df.columns]
+    # カラム名の先頭に空白文字がある場合があるので削除
+    result_df.columns = [jaconv.z2h(i.strip(), digit=True, ascii=True, kana=False) for i in result_df.columns]
 
     # 1列目のカラム名はaccountにして空白文字削除
     result_df.columns = ["account"] + list(result_df.columns)[1:]
