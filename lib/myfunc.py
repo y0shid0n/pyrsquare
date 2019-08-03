@@ -5,6 +5,7 @@ import re
 from bs4 import BeautifulSoup
 import pandas as pd
 import jaconv
+from datetime import datetime as dt
 
 def get_ecode(filename):
     """
@@ -164,3 +165,43 @@ def sep_unit(df, col):
     df_output[col] = df_output[col].apply(lambda x: get_value(x))
 
     return df_output
+
+def sep_period(df):
+    """
+    カラム名に期間の情報があるので、それを別カラムに分離する
+    カラム名からは期間の情報を削除
+    """
+    # 出力用のdf
+    df_output = df.copy()
+
+    # カラム名から期間情報を取得してdatetimeオブジェクトに変更
+    # 当期
+    cur_period_str = [re.sub("(^.*年度|\(|\))", "", i) for i in df.columns if re.search("^当.+(?<=年度)\(.+\)$", i)][0]
+    cur_period = dt.strptime(cur_period_str, '%Y年%m月%d日')
+    # 前期
+    prev_period_str = [re.sub("(^.*年度|\(|\))", "", i) for i in df.columns if re.search("^前.+(?<=年度)\(.+\)$", i)][0]
+    prev_period = dt.strptime(prev_period_str, '%Y年%m月%d日')
+
+    # カラムを追加
+    df_output["cur_period"] = cur_period
+    df_output["prev_period"] = prev_period
+
+    # カラム名から期間情報を削除して、連結と単体の表記揺れを統一
+    col_list = [re.sub("\(\d+年\d+月\d+日\)", "", i) for i in df_output.columns]
+    col_list = [re.sub("^当.+年度", "cur_value", i) for i in col_list]
+    col_list = [re.sub("^前.+年度", "prev_value", i) for i in col_list]
+    df_output.columns = col_list
+
+    return df_output
+
+def load_tax_effect_csv(file):
+    """
+    ファイルを読み込む関数
+    parse_xbrl.pyで一度出力することで空文字がnanになっているはずなので、
+    読み込んだ時に要素が全てnanの列は削除する
+    """
+    df = pd.read_csv(file, sep=",", encoding="utf-8")
+    for colname, item in df.iteritems():
+        if all(item.isnull()):
+            df.drop(colname, axis=1, inplace=True)
+    return df
