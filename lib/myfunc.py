@@ -4,6 +4,7 @@
 import re
 from bs4 import BeautifulSoup
 import pandas as pd
+import numpy as np
 import jaconv
 from datetime import datetime as dt
 
@@ -90,15 +91,15 @@ def get_unit(str):
 def get_value(str):
     """
     値の文字列から数値を取得する
-    マッチしないNoneTypeのときは空文字を返す
+    マッチしないNoneTypeのときはnp.nanを返したいので、値はfloatで返す
     """
     ptn = re.search(".*[0-9]+(?=[^0-9]*$)", str)
 
     if ptn is None:
-        return ""
+        return np.nan
     else:
         output = ptn.group(0).replace("△", "-").replace(",", "").replace("－", "")
-        return int(output)
+        return float(output)
 
 # def fill_unit(df, col_unit):
 #     """
