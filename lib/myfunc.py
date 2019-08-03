@@ -71,12 +71,17 @@ def table_to_pd(table):
         result_df = pd.DataFrame(result_list[1:], columns=result_list[0])
     else:
         # 単位のカラム名が分かれている場合はカラム名をつける
-        result_list[0].insert(2, result_list[0][1] + "_unit")
-        result_list[0].append(result_list[0][-1] + "_unit")
-        result_df = pd.DataFrame(result_list[1:], columns=result_list[0])
-        # 単位のカラムから不要な文字列を削除
-        result_df.iloc[:, 2] = result_df.iloc[:, 2].str.replace("〃", "").str.strip()
-        result_df.iloc[:, -1] = result_df.iloc[:, -1].str.replace("〃", "").str.strip()
+        # この辺はうまくいかない可能性がありそう（どこに空白列があるかがわからないので）
+        if max(col_num_list) == 6 and len(result_list[0]) == 4:
+            result_list[0].insert(2, result_list[0][1] + "_unit")
+            result_list[0].append(result_list[0][-1] + "_unit")
+            result_df = pd.DataFrame(result_list[1:], columns=result_list[0])
+        elif max(col_num_list) == 7 and len(result_list[0]) == 3:
+            result_list[0].insert(2, result_list[0][1] + "_unit")
+            result_list[0].append(result_list[0][-1] + "_unit")
+            result_list[0].insert(1, "blank1")
+            result_list[0].insert(4, "blank2")
+            result_df = pd.DataFrame(result_list[1:], columns=result_list[0])
 
     # カラム名の全角半角の揺れをなくす
     # カラム名の先頭に空白文字がある場合があるので削除
@@ -115,37 +120,14 @@ def get_value(str):
         output = re.sub("\s+", "", output)
         return float(output)
 
-# def fill_unit(df, col_unit):
-#     """
-#     指定した単位カラムに対して、単位が存在するときに次の要素が空文字だった場合は
-#     その単位で埋める処理を行う
-#     """
-#     # 出力用のdf
-#     df_output = df.copy()
-#
-#     # 単位のカラムをリストにする
-#     unit_list_tmp = list(df_output[col_unit])
-#     # 単位が存在するときに、次の要素が空文字だった場合はその単位で埋める
-#     for i in range(len(unit_list_tmp) - 1):
-#         if unit_list_tmp[i] == "":
-#             continue
-#         elif i == len(unit_list_tmp):
-#             continue
-#         elif unit_list_tmp[i + 1] == "":
-#             unit_list_tmp[i + 1] = unit_list_tmp[i]
-#         else:
-#             continue
-#     # 単位のカラムに戻す
-#     df_output[col_unit] = pd.Series(unit_list_tmp)
-#     return df_output
-
 def fill_unit(Series_unit):
     """
     指定した単位カラムに対して、単位が存在するときに次の要素が空文字だった場合は
     その単位で埋める処理を行う
     """
     # 単位のカラムをリストにする
-    unit_list_tmp = list(Series_unit)
+    # 同上を示す不要な文字列は削除
+    unit_list_tmp = list(Series_unit.str.replace("〃", "").str.strip())
     # 単位が存在するときに、次の要素が空文字だった場合はその単位で埋める
     for i in range(len(unit_list_tmp) - 1):
         if unit_list_tmp[i] == "":
@@ -172,12 +154,6 @@ def sep_unit(df, col):
 
     # 単位のカラムを作る
     df_output[col_unit] = df_output[col].apply(lambda x: get_unit(x))
-
-    # 単位を埋める
-    #df_output[col_unit] = fill_unit(df_output[col_unit])
-
-    # 元のカラムから単位を除去する
-    #df_output[col] = df_output[col].apply(lambda x: get_value(x))
 
     return df_output
 
