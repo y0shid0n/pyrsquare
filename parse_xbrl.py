@@ -66,7 +66,7 @@ for file in file_list:
         #     df.loc[:, collist_val] = df.loc[:, collist_val].applymap(myfunc.get_value)
 
         # dfが4列の場合は単位の分離を行う
-        if len(df.columns) == 4:
+        if len(df.columns) <= 4:
             # colname_tmpが含まれるカラムを取得
             colname_tmp_list = [i for i in df.columns if re.search(colname_tmp, i)]
 
