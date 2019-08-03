@@ -33,6 +33,14 @@ for file in file_list:
         print(v)
         obj = parser.parse_file(file)
         table = myfunc.get_table(obj, v, context_ref)
+
+        # tableがない場合はスキップ
+        if table is None:
+            # ToDo: loggingでlog出力したい
+            print("There is no table.")
+            continue
+
+        # tableをpd.DataFrameに変更あ
         df = myfunc.table_to_pd(table)
 
         # 辞書のキーでカラム名を変える

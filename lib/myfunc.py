@@ -20,10 +20,14 @@ def get_table(obj, key, context_ref):
     ファイルから必要なtableを抜き出す
     """
     # keyとcontext_refから該当箇所を取得
-    current_year_assets = obj.get_data_by_context_ref(key, context_ref).get_value()
+    current_year_assets = obj.get_data_by_context_ref(key, context_ref)
+
+    # 該当箇所がない場合はNoneを返す
+    if current_year_assets is None:
+        return None
 
     # htmlをパース
-    soup = BeautifulSoup(current_year_assets,'html.parser')
+    soup = BeautifulSoup(current_year_assets.get_value(), 'html.parser')
 
     # テーブルを指定（たぶん1つめだけでよさげ）
     table = soup.findAll("table")[0]
