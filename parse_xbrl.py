@@ -27,11 +27,18 @@ context_ref = "CurrentYearDuration"
 # 出力はpickleとかにしたほうがいいかも
 for file in file_list:
     print(file)
+    # edinet codeの取得
     ecode = myfunc.get_ecode(str(file))
+
+    # xbrlをパースしたオブジェクトを作成
+    obj = parser.parse_file(file)
+
+    # 会計基準の取得
+    acc_standard = myfunc.get_acc_standard(obj)
+
     for k, v in fs_dict.items():
         print(k)
         print(v)
-        obj = parser.parse_file(file)
         table = myfunc.get_table(obj, v, context_ref)
 
         # tableがない場合はスキップ
@@ -40,7 +47,7 @@ for file in file_list:
             print("There is no table.")
             continue
 
-        # tableをpd.DataFrameに変更あ
+        # tableをpd.DataFrameに変更
         df = myfunc.table_to_pd(table)
 
         # 辞書のキーでカラム名を変える
@@ -49,12 +56,12 @@ for file in file_list:
         else:
             colname_tmp = "事業年度"
 
-        # dfが6列の場合は単位のカラムの補完と値の数値変換を行う
-        if len(df.columns) == 6:
-            df.loc[:, df.columns.str.contains("_unit")] = df.loc[:, df.columns.str.contains("_unit")].apply(myfunc.fill_unit)
-            # 値のカラム
-            collist_val = [i for i in df.columns[df.columns.str.contains(colname_tmp)] if re.search("^.*(?<!_unit)$", i)]
-            df.loc[:, collist_val] = df.loc[:, collist_val].applymap(myfunc.get_value)
+        # # dfが6列の場合は単位のカラムの補完と値の数値変換を行う
+        # if len(df.columns) == 6:
+        #     df.loc[:, df.columns.str.contains("_unit")] = df.loc[:, df.columns.str.contains("_unit")].apply(myfunc.fill_unit)
+        #     # 値のカラム
+        #     collist_val = [i for i in df.columns[df.columns.str.contains(colname_tmp)] if re.search("^.*(?<!_unit)$", i)]
+        #     df.loc[:, collist_val] = df.loc[:, collist_val].applymap(myfunc.get_value)
 
         # dfが4列の場合は単位の分離を行う
         if len(df.columns) == 4:
@@ -67,9 +74,15 @@ for file in file_list:
         # カラム名から期間の情報を抽出して別のカラムにし、カラム名からは期間を削除
         df_output = myfunc.sep_period(df)
 
-        # edinet code, 単体or連結をカラムとして持たせる
+        # 単位のカラムの補完と値の数値変換
+        df_output.loc[:, df_output.columns.str.contains("_unit")] = df_output.loc[:, df_output.columns.str.contains("_unit")].apply(myfunc.fill_unit)
+        # 値のカラム
+        df_output.loc[:, ["cur_value", "prev_value"]] = df_output.loc[:, ["cur_value", "prev_value"]].applymap(myfunc.get_value)
+
+        # edinet code, 会計基準, 単体or連結をカラムとして持たせる
         df_output["ecode"] = ecode
         df_output["fs_type"] = k
+        df_output["acc_standard"] = acc_standard
 
         output_filename = "./output/parsed_csv/{}_{}_test.csv".format(ecode, k)
         df_output.to_csv(output_filename, sep=",", index=False, encoding="utf-8")
