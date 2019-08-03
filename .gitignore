@@ -14,6 +14,9 @@ data/*
 # output
 output/*
 !output/.gitkeep
+!output/parsed_csv/
+output/parsed_csv/*
+!output/parsed_csv/.gitkeep
 
 # lib
 lib/__pycache__/*
