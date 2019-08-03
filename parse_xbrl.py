@@ -8,24 +8,27 @@ import re
 import csv
 from lib import myfunc
 
-## init parser
+# init parser
 parser = EdinetXbrlParser()
 
 # file list
 data_path = Path("./data")
 file_list = data_path.glob("*.xbrl")
 
-## parse xbrl file and get data container
+# parse xbrl file and get data container
 xbrl_file_path = "./data/jpcrp030000-asr-001_E00008-000_2019-03-31_01_2019-06-21.xbrl"
 edinet_xbrl_object = parser.parse_file(xbrl_file_path)
 
 # どっちがどっちか要確認
 # 単体 or 連結のkeyの辞書
-fs_dict = {"not_cons": "jpcrp_cor:NotesTaxEffectAccountingFinancialStatementsTextBlock"
-    , "cons": "jpcrp_cor:NotesTaxEffectAccountingConsolidatedFinancialStatementsTextBlock"}
+fs_dict = {"non-consolidated": "jpcrp_cor:NotesTaxEffectAccountingFinancialStatementsTextBlock"
+    , "consolidated": "jpcrp_cor:NotesTaxEffectAccountingConsolidatedFinancialStatementsTextBlock"}
 
 context_ref = "CurrentYearDuration"
 
+# ファイルを読み込んで処理
+# ToDo: 処理時間にもよるが遅かったらmultiprocessingなどでやるのを検討
+# 出力はpickleとかにしたほうがいいかも
 for file in file_list:
     print(file)
     ecode = myfunc.get_ecode(str(file))
@@ -37,7 +40,7 @@ for file in file_list:
         df = myfunc.table_to_pd(table)
 
         # 辞書のキーでカラム名を変える
-        if k == "cons":
+        if k == "consolidated":
             colname_tmp = "連結会計年度"
         else:
             colname_tmp = "事業年度"
@@ -57,8 +60,12 @@ for file in file_list:
             for col in colname_tmp_list:
                 df = myfunc.sep_unit(df, col)
 
-        # edinet codeをカラムとして持たせる
-        df["ecode"] = ecode
+        # カラム名から期間の情報を抽出して別のカラムにし、カラム名からは期間を削除
+        df_output = myfunc.sep_period(df)
 
-        output_filename = "./output/{}_{}_test.csv".format(ecode, k)
-        df.to_csv(output_filename, sep=",", index=False, encoding="utf-8")
+        # edinet code, 単体or連結をカラムとして持たせる
+        df_output["ecode"] = ecode
+        df_output["fs_type"] = k
+
+        output_filename = "./output/parsed_csv/{}_{}_test.csv".format(ecode, k)
+        df_output.to_csv(output_filename, sep=",", index=False, encoding="utf-8")
