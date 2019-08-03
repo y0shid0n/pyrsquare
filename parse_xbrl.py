@@ -15,10 +15,6 @@ parser = EdinetXbrlParser()
 data_path = Path("./data")
 file_list = data_path.glob("*.xbrl")
 
-# parse xbrl file and get data container
-xbrl_file_path = "./data/jpcrp030000-asr-001_E00008-000_2019-03-31_01_2019-06-21.xbrl"
-edinet_xbrl_object = parser.parse_file(xbrl_file_path)
-
 # どっちがどっちか要確認
 # 単体 or 連結のkeyの辞書
 fs_dict = {"non-consolidated": "jpcrp_cor:NotesTaxEffectAccountingFinancialStatementsTextBlock"
