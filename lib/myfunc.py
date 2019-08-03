@@ -202,7 +202,7 @@ def sep_period(df):
     df_output["prev_period"] = prev_period_str
 
     # カラム名から期間情報を削除して、連結と単体の表記揺れを統一
-    col_list = [re.sub("末|平成|\(\d+年\d+月\d+日\)", "", i) for i in df_output.columns]
+    col_list = [re.sub("末||\(.*\d+年\d+月\d+日\)", "", i) for i in df_output.columns]
     col_list = [re.sub("^当.+年度", "cur_value", i) for i in col_list]
     col_list = [re.sub("^前.+年度", "prev_value", i) for i in col_list]
     df_output.columns = col_list
