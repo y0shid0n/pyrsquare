@@ -170,10 +170,12 @@ def sep_period(df):
     # カラム名から期間情報を取得してdatetimeオブジェクトに変更
     # 和暦混じっていることが発覚したので、一旦文字列のまま出しておく
     # 当期
-    cur_period_str = [re.sub("(^.*年度|末|\(|\))", "", i) for i in df.columns if re.search("^当.+(?<=年度).*\(.+\)$", i)][0]
+    cur_period_tmp = [re.sub("(^.*年度|末)", "", i) for i in df.columns if re.search("^当.+(?<=年度).*\(.+\)$", i)][0]
+    cur_period_str = re.search("(?<=^\().+(?=\)$)", cur_period_tmp).group()
     #cur_period = dt.strptime(cur_period_str, '%Y年%m月%d日')
     # 前期
-    prev_period_str = [re.sub("(^.*年度|末|\(|\))", "", i) for i in df.columns if re.search("^前.+(?<=年度).*\(.+\)$", i)][0]
+    prev_period_tmp = [re.sub("(^.*年度|末)", "", i) for i in df.columns if re.search("^前.+(?<=年度).*\(.+\)$", i)][0]
+    prev_period_str = re.search("(?<=^\().+(?=\)$)", prev_period_tmp).group()
     #prev_period = dt.strptime(prev_period_str, '%Y年%m月%d日')
 
     # カラムを追加
@@ -181,7 +183,8 @@ def sep_period(df):
     df_output["prev_period"] = prev_period_str
 
     # カラム名から期間情報を削除して、連結と単体の表記揺れを統一
-    col_list = [re.sub("末|\(.*\d+年\d+月\d+日\)", "", i) for i in df_output.columns]
+    #col_list = [re.sub("末|\(.*\d+年\d+月\d+日\)", "", i) for i in df_output.columns]
+    col_list = [i.replace(cur_period_tmp, "").replace(prev_period_tmp, "") for i in df_output.columns]
     col_list = [re.sub("^当.+年度", "cur_value", i) for i in col_list]
     col_list = [re.sub("^前.+年度", "prev_value", i) for i in col_list]
     df_output.columns = col_list
