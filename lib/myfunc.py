@@ -15,6 +15,13 @@ def get_ecode(filename):
     ecode = re.search("(?<=_)E[0-9]+(?=-)", filename)
     return ecode.group(0)
 
+def get_acc_standard(obj):
+    """
+    ファイルから会計基準を取得する
+    """
+    acc_standard = obj.get_data_by_context_ref("jpdei_cor:AccountingStandardsDEI", "FilingDateInstant").get_value()
+    return acc_standard
+
 def get_table(obj, key, context_ref):
     """
     ファイルから必要なtableを抜き出す
@@ -103,6 +110,7 @@ def get_value(str):
         return np.nan
     else:
         output = ptn.group(0).replace("△", "-").replace(",", "").replace("－", "")
+        output = re.sub("\s+", "", output)
         return float(output)
 
 # def fill_unit(df, col_unit):
@@ -164,10 +172,10 @@ def sep_unit(df, col):
     df_output[col_unit] = df_output[col].apply(lambda x: get_unit(x))
 
     # 単位を埋める
-    df_output[col_unit] = fill_unit(df_output[col_unit])
+    #df_output[col_unit] = fill_unit(df_output[col_unit])
 
     # 元のカラムから単位を除去する
-    df_output[col] = df_output[col].apply(lambda x: get_value(x))
+    #df_output[col] = df_output[col].apply(lambda x: get_value(x))
 
     return df_output
 
@@ -181,10 +189,10 @@ def sep_period(df):
 
     # カラム名から期間情報を取得してdatetimeオブジェクトに変更
     # 当期
-    cur_period_str = [re.sub("(^.*年度|\(|\))", "", i) for i in df.columns if re.search("^当.+(?<=年度)\(.+\)$", i)][0]
+    cur_period_str = [re.sub("(^.*年度|末|\(|\))", "", i) for i in df.columns if re.search("^当.+(?<=年度).*\(.+\)$", i)][0]
     cur_period = dt.strptime(cur_period_str, '%Y年%m月%d日')
     # 前期
-    prev_period_str = [re.sub("(^.*年度|\(|\))", "", i) for i in df.columns if re.search("^前.+(?<=年度)\(.+\)$", i)][0]
+    prev_period_str = [re.sub("(^.*年度|末|\(|\))", "", i) for i in df.columns if re.search("^前.+(?<=年度).*\(.+\)$", i)][0]
     prev_period = dt.strptime(prev_period_str, '%Y年%m月%d日')
 
     # カラムを追加
@@ -192,7 +200,7 @@ def sep_period(df):
     df_output["prev_period"] = prev_period
 
     # カラム名から期間情報を削除して、連結と単体の表記揺れを統一
-    col_list = [re.sub("\(\d+年\d+月\d+日\)", "", i) for i in df_output.columns]
+    col_list = [re.sub("末|\(\d+年\d+月\d+日\)", "", i) for i in df_output.columns]
     col_list = [re.sub("^当.+年度", "cur_value", i) for i in col_list]
     col_list = [re.sub("^前.+年度", "prev_value", i) for i in col_list]
     df_output.columns = col_list
