@@ -63,20 +63,22 @@ def table_to_pd(table):
     # 1行目が全て空なら削除
     if result_list[0].count("") == len(result_list[0]):
         result_list = result_list[1:]
+    #return(result_list)
 
     # 単位のカラムが分かれてる場合とそうでない場合があるので分岐
     col_num_list = [len(i) for i in result_list]
+    print(col_num_list)
     if col_num_list.count(max(col_num_list)) == len(col_num_list):
         # 単位が分かれていなければそのまま
         result_df = pd.DataFrame(result_list[1:], columns=result_list[0])
     else:
         # 単位のカラム名が分かれている場合はカラム名をつける
         # この辺はうまくいかない可能性がありそう（どこに空白列があるかがわからないので）
-        if max(col_num_list) == 6 and len(result_list[0]) == 4:
+        if max(col_num_list) - len(result_list[0]) == 2:
             result_list[0].insert(2, result_list[0][1] + "_unit")
             result_list[0].append(result_list[0][-1] + "_unit")
             result_df = pd.DataFrame(result_list[1:], columns=result_list[0])
-        elif max(col_num_list) == 7 and len(result_list[0]) == 3:
+        elif max(col_num_list) - len(result_list[0]) == 4:
             result_list[0].insert(2, result_list[0][1] + "_unit")
             result_list[0].append(result_list[0][-1] + "_unit")
             result_list[0].insert(1, "blank1")
