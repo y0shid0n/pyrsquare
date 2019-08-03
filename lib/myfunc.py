@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 import jaconv
 from datetime import datetime as dt
+import sys
 
 def get_ecode(filename):
     """
@@ -188,24 +189,61 @@ def sep_period(df):
     df_output = df.copy()
 
     # カラム名から期間情報を取得してdatetimeオブジェクトに変更
+    # 和暦混じっていることが発覚したので、一旦文字列のまま出しておく
     # 当期
     cur_period_str = [re.sub("(^.*年度|末|\(|\))", "", i) for i in df.columns if re.search("^当.+(?<=年度).*\(.+\)$", i)][0]
-    cur_period = dt.strptime(cur_period_str, '%Y年%m月%d日')
+    #cur_period = dt.strptime(cur_period_str, '%Y年%m月%d日')
     # 前期
     prev_period_str = [re.sub("(^.*年度|末|\(|\))", "", i) for i in df.columns if re.search("^前.+(?<=年度).*\(.+\)$", i)][0]
-    prev_period = dt.strptime(prev_period_str, '%Y年%m月%d日')
+    #prev_period = dt.strptime(prev_period_str, '%Y年%m月%d日')
 
     # カラムを追加
-    df_output["cur_period"] = cur_period
-    df_output["prev_period"] = prev_period
+    df_output["cur_period"] = cur_period_str
+    df_output["prev_period"] = prev_period_str
 
     # カラム名から期間情報を削除して、連結と単体の表記揺れを統一
-    col_list = [re.sub("末|\(\d+年\d+月\d+日\)", "", i) for i in df_output.columns]
+    col_list = [re.sub("末|平成|\(\d+年\d+月\d+日\)", "", i) for i in df_output.columns]
     col_list = [re.sub("^当.+年度", "cur_value", i) for i in col_list]
     col_list = [re.sub("^前.+年度", "prev_value", i) for i in col_list]
     df_output.columns = col_list
 
     return df_output
+
+def wareki2seireki(warekiYear):
+    """
+    和暦を西暦に変換する関数
+    とりあえず関数だけ実装
+    """
+
+    pattern = re.compile('^(明治|大正|昭和|平成|令和)([元0-9０-９]+)年$')
+    matches = pattern.match(warekiYear)
+
+    if matches:
+
+        era_name = matches.group(1)
+        year = matches.group(2)
+
+        if year == '元':
+            year = 1
+        else:
+            if sys.version_info < (3, 0):
+                year = year.decode('utf-8')
+            year = int(jaconv.z2h(year, digit=True))
+
+        if era_name == '明治':
+            year += 1867
+        elif era_name == '大正':
+            year += 1911
+        elif era_name == '昭和':
+            year += 1925
+        elif era_name == '平成':
+            year += 1988
+        elif era_name == '令和':
+            year += 2018
+
+        return str(year) +'年'
+
+    return null
 
 def load_tax_effect_csv(file):
     """
