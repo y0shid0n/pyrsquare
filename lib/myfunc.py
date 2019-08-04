@@ -64,6 +64,9 @@ def table_to_list(table):
     # 最後に表示方法の変更が入っていたら削除
     if "表示方法の変更" in result_list[-1][0]:
         result_list = result_list[:-1]
+    # 最後に増加の主な内容が入っていたら削除
+    elif "この増加の主な内容は" in result_list[-1][0]:
+        result_list = result_list[:-1]
 
     pprint(result_list)
     return(result_list)
