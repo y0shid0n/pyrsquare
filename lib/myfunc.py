@@ -106,7 +106,7 @@ def list_to_pd(result_list):
             result_list[0].insert(3, result_list[0][1] + "_unit")
             result_list[0].append(result_list[0][-1] + "_unit")
             result_list[0].insert(1, "blank1")
-            result_list[0].insert(4, "blank2")
+            result_list[0].insert(5, "blank2")
             result_df = pd.DataFrame(result_list[1:], columns=result_list[0])
         elif max(col_num_list) - len(result_list[0]) == 2:
             result_list[0].insert(-2, result_list[0][-3] + "_unit")
