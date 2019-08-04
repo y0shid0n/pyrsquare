@@ -79,6 +79,11 @@ def table_to_pd(table):
             result_list[0].insert(2, result_list[0][1] + "_unit")
             result_list[0].append(result_list[0][-1] + "_unit")
             result_df = pd.DataFrame(result_list[1:], columns=result_list[0])
+        elif max(col_num_list) == 3 and len(result_list[0]) == 2:
+            result_list[0].append(result_list[0][-1] + "_unit")
+            result_df = pd.DataFrame(result_list[1:], columns=result_list[0])
+            result_df["前連結会計年度(brank)"] = ""
+            result_df["前連結会計年度(brank)_unit"] = ""
         elif max(col_num_list) - len(result_list[0]) == 2:
             result_list[0].insert(-2, result_list[0][-3] + "_unit")
             result_list[0].append(result_list[0][-1] + "_unit")
