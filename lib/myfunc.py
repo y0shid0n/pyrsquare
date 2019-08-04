@@ -61,8 +61,10 @@ def table_to_pd(table):
 
     # pandas.DataFrameに変換
     # 1行目が全て空なら削除
-    if result_list[0].count("") == len(result_list[0]):
-        result_list = result_list[1:]
+    # if result_list[0].count("") == len(result_list[0]):
+    #     result_list = result_list[1:]
+    # 全て空の行は削除
+    result_list = [i for i in result_list if i.count("") != len(i)]
     print(result_list)
     #return(result_list)
 
