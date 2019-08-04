@@ -59,10 +59,6 @@ def table_to_list(table):
             csvRow.append(tmp)
         result_list.append(csvRow)
 
-    # pandas.DataFrameに変換
-    # 1行目が全て空なら削除
-    # if result_list[0].count("") == len(result_list[0]):
-    #     result_list = result_list[1:]
     # 全て空の行は削除
     result_list = [i for i in result_list if i.count("") != len(i)]
     # 最後に表示方法の変更が入っていたら削除
@@ -93,16 +89,6 @@ def list_to_pd(result_list):
     else:
         # 単位のカラム名が分かれている場合はカラム名をつける
         # この辺はうまくいかない可能性がありそう（どこに空白列があるかがわからないので）
-        # if max(col_num_list) == 5 and len(result_list[0]) == 3:
-        #     result_list[0].insert(2, result_list[0][1] + "_unit")
-        #     result_list[0].append(result_list[0][-1] + "_unit")
-        #     result_df = pd.DataFrame(result_list[1:], columns=result_list[0])
-        # elif max(col_num_list) == 7 and len(result_list[0]) == 5 and result_list[0][-1] == "":
-        #     # max(col_num_list) == 7 and len(result_list[0]) == 5は2パターンある
-        #     # カラム名の行の最後に空白があるパターンのみをここでキャッチ
-        #     result_list[0].insert(2, result_list[0][1] + "_unit")
-        #     result_list[0].insert(-1, result_list[0][-2] + "_unit")
-        #     result_df = pd.DataFrame(result_list[1:], columns=result_list[0])
         if max(col_num_list) == 3 and len(result_list[0]) == 2:
             result_list[0].append(result_list[0][-1] + "_unit")
             result_df = pd.DataFrame(result_list[1:], columns=result_list[0])
@@ -133,8 +119,6 @@ def list_to_pd(result_list):
             # そのindexの後ろに、その要素+"_unit"の要素を入れる
             result_list[0].insert(value_index_list[0] + 1, result_list[0][value_index_list[0]] + "_unit")
             result_list[0].insert(value_index_list[1] + 2, result_list[0][value_index_list[1] + 1] + "_unit")
-            #result_list[0].insert(-2, result_list[0][-3] + "_unit")
-            #result_list[0].append(result_list[0][-1] + "_unit")
             result_df = pd.DataFrame(result_list[1:], columns=result_list[0])
         elif max(col_num_list) - len(result_list[0]) == 4:
             result_list[0].insert(2, result_list[0][1] + "_unit")
@@ -211,7 +195,7 @@ def fill_unit(Series_unit):
     """
     # 単位のカラムをリストにする
     # 同上を示す不要な文字列は削除
-    unit_list_tmp = list(Series_unit.str.replace("〃", "").str.strip())
+    unit_list_tmp = list(Series_unit.str.replace("〃", "").replace("－", "").replace("―", "").str.strip())
     # 単位が存在するときに、次の要素が空文字だった場合はその単位で埋める
     for i in range(len(unit_list_tmp) - 1):
         if unit_list_tmp[i] == "":
