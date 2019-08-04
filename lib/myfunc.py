@@ -87,7 +87,10 @@ def list_to_pd(result_list):
                 #result_df.columns = list(result_df.columns)[:-1] + ["drop_tmp"]
             else:
                 new_colname.append(colname)
-        result_df.drop("drop_tmp", axis=1, inplace=True)
+        # カラム名を書き換えて、"drop_tmp"があれば削除
+        result_df.columns = new_colname
+        if "drop_tmp" in result_df.columns:
+            result_df.drop("drop_tmp", axis=1, inplace=True)
 
         # 前期データがない場合は前期データを作成する
         if len(result_df.columns) == 2:
