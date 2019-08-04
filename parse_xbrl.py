@@ -40,13 +40,15 @@ for file in file_list:
 
     for k, v in fs_dict.items():
         print(k)
-        print(v)
+        #print(v)
         table = myfunc.get_table(obj, v, context_ref)
 
         # tableがない場合はスキップ
         if table is None:
             # ToDo: loggingでlog出力したい
             print("There is no table.")
+            # 空ファイルを出しておく（python3.4以降のみ対応）
+            Path("./output/parsed_csv/{}_{}_test.csv".format(ecode, k)).touch()
             continue
 
         # tableをpd.DataFrameに変更

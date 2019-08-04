@@ -312,10 +312,14 @@ def wareki2seireki(warekiYear):
 def load_tax_effect_csv(file):
     """
     ファイルを読み込む関数
+    空ファイルはNoneを返す
     parse_xbrl.pyで一度出力することで空文字がnanになっているはずなので、
     読み込んだ時に要素が全てnanの列は削除する
     """
-    df = pd.read_csv(file, sep=",", encoding="utf-8")
+    try:
+        df = pd.read_csv(file, sep=",", encoding="utf-8")
+    except pd.errors.EmptyDataError:
+        return None
     for colname, item in df.iteritems():
         if all(item.isnull()):
             df.drop(colname, axis=1, inplace=True)
