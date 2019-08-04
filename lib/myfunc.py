@@ -79,10 +79,11 @@ def list_to_pd(result_list):
     if col_num_list.count(max(col_num_list)) == len(col_num_list):
         # 単位が分かれていなければそのまま
         result_df = pd.DataFrame(result_list[1:], columns=result_list[0])
-        # 最後の列が全て空文字かつカラム名も空文字なら列を削除
-        if all([x == "" for x in list(result_df.iloc[:, -1])]) and result_df.columns[-1] == "":
-            result_df.columns = list(result_df.columns)[:-1] + ["drop_tmp"]
-            result_df.drop("drop_tmp", axis=1, inplace=True)
+        # 全て空文字かつカラム名も空文字の列を削除
+        for colname, item in df.iteritems():
+            if all([x == "" for x in list(item)]) and colname == "":
+                result_df.columns = list(result_df.columns)[:-1] + ["drop_tmp"]
+                result_df.drop("drop_tmp", axis=1, inplace=True)
         # 前期データがない場合は前期データを作成する
         if len(result_df.columns) == 2:
             result_df["前連結会計年度(brank)"] = ""
