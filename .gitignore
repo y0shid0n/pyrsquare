@@ -10,6 +10,9 @@
 # data
 data/*
 !data/.gitkeep
+!data/skip/
+data/skip/*
+!data/skip/.gitkeep
 
 # output
 output/*
