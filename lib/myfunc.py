@@ -98,6 +98,8 @@ def list_to_pd(result_list):
             result_list[0].append(result_list[0][-1] + "_unit")
             result_df = pd.DataFrame(result_list[1:], columns=result_list[0])
         elif max(col_num_list) == 7 and len(result_list[0]) == 5 and result_list[0][-1] == "":
+            # max(col_num_list) == 7 and len(result_list[0]) == 5は2パターンある
+            # カラム名の行の最後に空白があるパターンのみをここでキャッチ
             result_list[0].insert(2, result_list[0][1] + "_unit")
             result_list[0].insert(-1, result_list[0][-2] + "_unit")
             result_df = pd.DataFrame(result_list[1:], columns=result_list[0])
