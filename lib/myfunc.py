@@ -77,11 +77,15 @@ def list_to_pd(result_list):
     htmlのtableタグをパースして作成したリストをpd.DataFrameに変換する
     """
     # 単位のカラムが分かれてる場合とそうでない場合があるので分岐
+    # 列数が合うものは単位がわかれていない（一部例外あり）
     col_num_list = [len(i) for i in result_list]
     print(col_num_list)
     if col_num_list.count(max(col_num_list)) == len(col_num_list):
         # 単位が分かれていなければそのまま
         result_df = pd.DataFrame(result_list[1:], columns=result_list[0])
+        # 前期データがない場合は前期データを作成する
+        if len(col_num_list) == 2:
+            result_df["前連結会計年度(brank)"] == ""
     else:
         # 単位のカラム名が分かれている場合はカラム名をつける
         # この辺はうまくいかない可能性がありそう（どこに空白列があるかがわからないので）
