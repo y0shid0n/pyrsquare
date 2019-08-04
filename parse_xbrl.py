@@ -6,7 +6,28 @@ from edinet_xbrl.edinet_xbrl_parser import EdinetXbrlParser
 from pathlib import Path
 import re
 import csv
+import sys
+import os
 from lib import myfunc
+
+# 引数を取得
+args = sys.argv
+
+# 処理済みファイル名
+checked_file = "./output/checked_file.txt"
+
+# 引数がなければそのまま、引数にinitがあれば処理済リストを初期化
+if not Path(checked_file).exists():
+    Path(checked_file).touch()
+elif len(args) == 1:
+    pass
+elif args[1] == "init":
+    os.remove(checked_file)
+    Path(checked_file).touch()
+
+# checked_fileの読み込み
+with open(checked_file, "r", encoding="UTF-8") as f:
+    checked_file_list = [i.strip() for i in f.readlines()]
 
 # init parser
 parser = EdinetXbrlParser()
@@ -14,6 +35,8 @@ parser = EdinetXbrlParser()
 # file list
 data_path = Path("./data")
 file_list = data_path.glob("*.xbrl")
+# 処理済みとの差分
+file_list = [i for i in file_list if i.name not in checked_file_list]
 
 # どっちがどっちか要確認
 # 単体 or 連結のkeyの辞書
@@ -51,6 +74,9 @@ for file in file_list:
         print("There is no table.")
         # 空ファイルを出しておく（python3.4以降のみ対応）
         Path("./output/parsed_csv/{}_{}_test.csv".format(ecode, fs_type)).touch()
+        # checked_fileに書き込み
+        with open(checked_file, "a", encoding="UTF-8") as f:
+            f.write(file.name + "\n")
         continue
 
     # tableをpd.DataFrameに変更
@@ -100,3 +126,7 @@ for file in file_list:
 
     output_filename = "./output/parsed_csv/{}_{}_test.csv".format(ecode, fs_type)
     df_output.to_csv(output_filename, sep=",", index=False, encoding="utf-8")
+
+    # 処理済みファイルに書き込み
+    with open(checked_file, "a", encoding="UTF-8") as f:
+        f.write(file.name + "\n")
