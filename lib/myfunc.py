@@ -84,7 +84,7 @@ def list_to_pd(result_list):
         # 単位が分かれていなければそのまま
         result_df = pd.DataFrame(result_list[1:], columns=result_list[0])
         # 前期データがない場合は前期データを作成する
-        if len(col_num_list) == 2:
+        if max(col_num_list) == 2:
             result_df["前連結会計年度(brank)"] == ""
     else:
         # 単位のカラム名が分かれている場合はカラム名をつける
