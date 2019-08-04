@@ -242,11 +242,11 @@ def sep_period(df):
     # 和暦混じっていることが発覚したので、一旦文字列のまま出しておく
     # 当期
     cur_period_tmp = [re.sub("(^.*年度|末)", "", i) for i in df.columns if re.search("^当.+(?<=年度).*\(.+\)$", i)][0]
-    cur_period_str = re.search("(?<=^\().+(?=\)$)", cur_period_tmp).group()
+    cur_period_str = re.search("(?<=^\().+(?=\)$)", cur_period_tmp.strip()).group()
     #cur_period = dt.strptime(cur_period_str, '%Y年%m月%d日')
     # 前期
     prev_period_tmp = [re.sub("(^.*年度|末)", "", i) for i in df.columns if re.search("^前.+(?<=年度).*\(.+\)$", i)][0]
-    prev_period_str = re.search("(?<=^\().+(?=\)$)", prev_period_tmp).group()
+    prev_period_str = re.search("(?<=^\().+(?=\)$)", prev_period_tmp.strip()).group()
     #prev_period = dt.strptime(prev_period_str, '%Y年%m月%d日')
 
     # カラムを追加
