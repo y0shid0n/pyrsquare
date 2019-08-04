@@ -87,7 +87,7 @@ def list_to_pd(result_list):
         if all([x == "" for x in list(result_df.iloc[-1])]) and df.columns[-1] == "":
             result_df.drop(result_df.columns[-1], axis=1, inplace=True)
         # 前期データがない場合は前期データを作成する
-        if max(col_num_list) == 2:
+        if len(reslut_df.columns) == 2:
             result_df["前連結会計年度(brank)"] = ""
     else:
         # 単位のカラム名が分かれている場合はカラム名をつける
