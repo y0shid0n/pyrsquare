@@ -80,10 +80,15 @@ def list_to_pd(result_list):
         # 単位が分かれていなければそのまま
         result_df = pd.DataFrame(result_list[1:], columns=result_list[0])
         # 全て空文字かつカラム名も空文字の列を削除
-        for colname, item in df.iteritems():
+        new_colname = []
+        for colname, item in result_df.iteritems():
             if all([x == "" for x in list(item)]) and colname == "":
-                result_df.columns = list(result_df.columns)[:-1] + ["drop_tmp"]
-                result_df.drop("drop_tmp", axis=1, inplace=True)
+                new_colname.append("drop_tmp")
+                #result_df.columns = list(result_df.columns)[:-1] + ["drop_tmp"]
+            else:
+                new_colname.append(colname)
+        result_df.drop("drop_tmp", axis=1, inplace=True)
+
         # 前期データがない場合は前期データを作成する
         if len(result_df.columns) == 2:
             result_df["前連結会計年度(brank)"] = ""
