@@ -66,6 +66,9 @@ def table_to_pd(table):
     #     result_list = result_list[1:]
     # 全て空の行は削除
     result_list = [i for i in result_list if i.count("") != len(i)]
+    # 最後に表示方法の変更が入っていたら削除
+    if "表示方法の変更" in result_list[-1][0]:
+        result_list = result_list[:-1]
     pprint(result_list)
     #return(result_list)
 
