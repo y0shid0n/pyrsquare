@@ -53,6 +53,11 @@ for file in file_list:
         table_list = myfunc.table_to_list(table)
         df = myfunc.list_to_pd(table_list)
 
+        # E04196は例外処理
+        if ecode == "E01496":
+            df.columns = ["account", "blank1", "前連結会計年度(平成30年3月31日)", "前連結会計年度(平成30年3月31日)_unit"
+                , "blank2", "blank3", "当連結会計年度(平成31年3月31日)" ,"当連結会計年度(平成31年3月31日)_unit"]
+
         # 辞書のキーでカラム名を変える
         if k == "consolidated":
             colname_tmp = "連結会計年度"
