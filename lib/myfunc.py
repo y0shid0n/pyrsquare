@@ -75,7 +75,7 @@ def table_to_pd(table):
         # 単位のカラム名が分かれている場合はカラム名をつける
         # この辺はうまくいかない可能性がありそう（どこに空白列があるかがわからないので）
         if max(col_num_list) - len(result_list[0]) == 2:
-            result_list[0].insert(2, result_list[0][1] + "_unit")
+            result_list[0].insert(-2, result_list[0][-3] + "_unit")
             result_list[0].append(result_list[0][-1] + "_unit")
             result_df = pd.DataFrame(result_list[1:], columns=result_list[0])
         elif max(col_num_list) - len(result_list[0]) == 4:
