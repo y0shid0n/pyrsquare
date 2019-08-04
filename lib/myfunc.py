@@ -102,15 +102,17 @@ def table_to_pd(table):
     # カラム名の先頭に空白文字がある場合があるので削除
     result_df.columns = [jaconv.z2h(i.strip(), digit=True, ascii=True, kana=False) for i in result_df.columns]
 
-    # 1列目のカラム名はaccountにして空白文字削除
+    # 1列目のカラム名はaccountにして空白文字削除、全角記号と英数字は半角に統一
     result_df.columns = ["account"] + list(result_df.columns)[1:]
-    result_df["account"] = result_df["account"].str.strip()
+    #result_df["account"] = result_df["account"].str.strip()
+    result_df["account"] = result_df["account"].apply(lambda x: jaconv.z2h(x.strip(), digit=True, ascii=True, kana=False))
 
     return result_df
 
 def get_unit(str):
     """
     値の文字列から単位を取得する
+    末尾の)or）は単位ではないので除外
     マッチしないNoneTypeのときは空文字を返す
     """
     ptn = re.search("(?<=[0-9])[^0-9]+$", str)
@@ -118,22 +120,44 @@ def get_unit(str):
     if ptn is None:
         return ""
     else:
-        output = ptn.group(0).replace("〃", "").strip()
+        output = ptn.group(0).replace("〃", "").replace("\)", "").replace("）", "").strip()
         return output
 
-def get_value(str):
+# def get_value(str):
+#     """
+#     値の文字列から数値を取得する
+#     マッチしないNoneTypeのときはnp.nanを返したいので、値はfloatで返す
+#     """
+#     ptn = re.search(".*[0-9]+(?=[^0-9]*$)", str)
+#
+#     if ptn is None:
+#         return np.nan
+#     else:
+#         output = ptn.group(0).replace("△", "-").replace(",", "").replace("－", "")
+#         output = re.sub("\s+", "", output)
+#         return float(output)
+
+def get_value(account, value_str):
     """
     値の文字列から数値を取得する
     マッチしないNoneTypeのときはnp.nanを返したいので、値はfloatで返す
+    accountが()で囲われているときは、()の除外処理も行う
     """
-    ptn = re.search(".*[0-9]+(?=[^0-9]*$)", str)
+    # 数値のパターン
+    ptn = re.search(".*[0-9]+(?=[^0-9]*$)", value_str)
+
+    # accountカラムが()で囲われているかどうか
+    acc_bracket = re.search("^\(.+\)$", account)
 
     if ptn is None:
         return np.nan
+    elif acc_bracket:
+        output = ptn.group(0).replace("△", "-").replace(",", "").replace("－", "").replace("\(", "").replace("（", "")
     else:
         output = ptn.group(0).replace("△", "-").replace(",", "").replace("－", "")
-        output = re.sub("\s+", "", output)
-        return float(output)
+
+    output = re.sub("\s+", "", output)
+    return float(output)
 
 def fill_unit(Series_unit):
     """

@@ -79,7 +79,9 @@ for file in file_list:
         # 単位のカラムの補完と値の数値変換
         df_output.loc[:, df_output.columns.str.contains("_unit")] = df_output.loc[:, df_output.columns.str.contains("_unit")].apply(myfunc.fill_unit)
         # 値のカラムを数値にする
-        df_output.loc[:, ["cur_value", "prev_value"]] = df_output.loc[:, ["cur_value", "prev_value"]].applymap(myfunc.get_value)
+        #df_output.loc[:, ["cur_value", "prev_value"]] = df_output.loc[:, ["cur_value", "prev_value"]].applymap(myfunc.get_value)
+        df_output["cur_value"] = df_output[["account", "cur_value"]].apply(lambda x: myfunc.get_value(x[0], x[1]), axis=1)
+        df_output["prev_value"] = df_output[["account", "prev_value"]].apply(lambda x: myfunc.get_value(x[0], x[1]), axis=1)
 
         # edinet code, 会計基準, 単体or連結をカラムとして持たせる
         df_output["ecode"] = ecode
