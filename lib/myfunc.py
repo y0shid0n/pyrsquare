@@ -93,17 +93,17 @@ def list_to_pd(result_list):
     else:
         # 単位のカラム名が分かれている場合はカラム名をつける
         # この辺はうまくいかない可能性がありそう（どこに空白列があるかがわからないので）
-        if max(col_num_list) == 5 and len(result_list[0]) == 3:
-            result_list[0].insert(2, result_list[0][1] + "_unit")
-            result_list[0].append(result_list[0][-1] + "_unit")
-            result_df = pd.DataFrame(result_list[1:], columns=result_list[0])
-        elif max(col_num_list) == 7 and len(result_list[0]) == 5 and result_list[0][-1] == "":
-            # max(col_num_list) == 7 and len(result_list[0]) == 5は2パターンある
-            # カラム名の行の最後に空白があるパターンのみをここでキャッチ
-            result_list[0].insert(2, result_list[0][1] + "_unit")
-            result_list[0].insert(-1, result_list[0][-2] + "_unit")
-            result_df = pd.DataFrame(result_list[1:], columns=result_list[0])
-        elif max(col_num_list) == 3 and len(result_list[0]) == 2:
+        # if max(col_num_list) == 5 and len(result_list[0]) == 3:
+        #     result_list[0].insert(2, result_list[0][1] + "_unit")
+        #     result_list[0].append(result_list[0][-1] + "_unit")
+        #     result_df = pd.DataFrame(result_list[1:], columns=result_list[0])
+        # elif max(col_num_list) == 7 and len(result_list[0]) == 5 and result_list[0][-1] == "":
+        #     # max(col_num_list) == 7 and len(result_list[0]) == 5は2パターンある
+        #     # カラム名の行の最後に空白があるパターンのみをここでキャッチ
+        #     result_list[0].insert(2, result_list[0][1] + "_unit")
+        #     result_list[0].insert(-1, result_list[0][-2] + "_unit")
+        #     result_df = pd.DataFrame(result_list[1:], columns=result_list[0])
+        if max(col_num_list) == 3 and len(result_list[0]) == 2:
             result_list[0].append(result_list[0][-1] + "_unit")
             result_df = pd.DataFrame(result_list[1:], columns=result_list[0])
             result_df["前連結会計年度(brank)"] = ""
@@ -128,8 +128,13 @@ def list_to_pd(result_list):
             result_list[0].insert(5, "blank2")
             result_df = pd.DataFrame(result_list[1:], columns=result_list[0])
         elif max(col_num_list) - len(result_list[0]) == 2:
-            result_list[0].insert(-2, result_list[0][-3] + "_unit")
-            result_list[0].append(result_list[0][-1] + "_unit")
+            # "年度"を含む要素のindexのリストを取得
+            value_index_list = [i for i, value in enumerate(result_list[0]) if re.search("年度", value)]
+            # そのindexの後ろに、その要素+"_unit"の要素を入れる
+            result_list[0].insert(value_index_list[0] + 1, result_list[0][value_index_list[0]] + "_unit")
+            result_list[0].insert(value_index_list[1] + 2, result_list[0][value_index_list[1] + 1] + "_unit")
+            #result_list[0].insert(-2, result_list[0][-3] + "_unit")
+            #result_list[0].append(result_list[0][-1] + "_unit")
             result_df = pd.DataFrame(result_list[1:], columns=result_list[0])
         elif max(col_num_list) - len(result_list[0]) == 4:
             result_list[0].insert(2, result_list[0][1] + "_unit")
