@@ -85,7 +85,7 @@ def list_to_pd(result_list):
         result_df = pd.DataFrame(result_list[1:], columns=result_list[0])
         # 前期データがない場合は前期データを作成する
         if max(col_num_list) == 2:
-            result_df["前連結会計年度(brank)"] == ""
+            result_df["前連結会計年度(brank)"] = ""
     else:
         # 単位のカラム名が分かれている場合はカラム名をつける
         # この辺はうまくいかない可能性がありそう（どこに空白列があるかがわからないので）
