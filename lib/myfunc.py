@@ -8,6 +8,7 @@ import numpy as np
 import jaconv
 from datetime import datetime as dt
 import sys
+from pprint import pprint
 
 def get_ecode(filename):
     """
@@ -65,7 +66,7 @@ def table_to_pd(table):
     #     result_list = result_list[1:]
     # 全て空の行は削除
     result_list = [i for i in result_list if i.count("") != len(i)]
-    print(result_list)
+    pprint(result_list)
     #return(result_list)
 
     # 単位のカラムが分かれてる場合とそうでない場合があるので分岐
