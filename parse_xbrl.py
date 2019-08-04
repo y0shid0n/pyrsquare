@@ -50,7 +50,8 @@ for file in file_list:
             continue
 
         # tableをpd.DataFrameに変更
-        df = myfunc.table_to_pd(table)
+        table_list = myfunc.table_to_list(table)
+        df = myfunc.list_to_pd(table_list)
 
         # 辞書のキーでカラム名を変える
         if k == "consolidated":

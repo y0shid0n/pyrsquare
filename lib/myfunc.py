@@ -42,8 +42,7 @@ def get_table(obj, key, context_ref):
     table = soup.findAll("table")[0]
     return table
 
-
-def table_to_pd(table):
+def table_to_list(table):
     """
     htmlのtableをpd.DataFrameに変換する
     """
@@ -69,9 +68,14 @@ def table_to_pd(table):
     # 最後に表示方法の変更が入っていたら削除
     if "表示方法の変更" in result_list[-1][0]:
         result_list = result_list[:-1]
-    pprint(result_list)
-    #return(result_list)
 
+    pprint(result_list)
+    return(result_list)
+
+def list_to_pd(result_list):
+    """
+    htmlのtableタグをパースして作成したリストをpd.DataFrameに変換する
+    """
     # 単位のカラムが分かれてる場合とそうでない場合があるので分岐
     col_num_list = [len(i) for i in result_list]
     print(col_num_list)
