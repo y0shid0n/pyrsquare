@@ -188,6 +188,7 @@ def modify_df_individual(df, ecode):
     個別のDataFrameを修正する
     ある程度パターンがわかったら汎用的に書きたい
     """
+    # カラム名の例外
     if ecode == "E04196":
         df.columns = ["account", "前連結会計年度(平成30年3月31日)", "前連結会計年度(平成30年3月31日)_unit"
             , "当連結会計年度(平成31年3月31日)" ,"当連結会計年度(平成31年3月31日)_unit"]
@@ -202,16 +203,22 @@ def modify_df_individual(df, ecode):
         df.columns = ['account', 'blank1', '前連結会計年度(2018年3月31日)', '前連結会計年度(2018年3月31日)_unit'
             , 'blank2', '', '当連結会計年度(2019年3月31日)', '当連結会計年度(2019年3月31日)_unit']
     # 値の列と単位の列が逆、単位自体は分かれていなかったので個別対応
-    elif ecode == "E04149":
-        df.columns = ['account', '前連結会計年度(平成30年3月31日)_unit', '前連結会計年度(平成30年3月31日)', ''
-            , '当連結会計年度(平成31年3月31日)_unit', '当連結会計年度(平成31年3月31日)']
-        df["前連結会計年度(平成30年3月31日)_unit"] = df["前連結会計年度(平成30年3月31日)"].apply(lambda x: get_unit(x))
-        df["当連結会計年度(平成31年3月31日)_unit"] = df["当連結会計年度(平成31年3月31日)"].apply(lambda x: get_unit(x))
-    elif ecode == "E05017":
-        df.columns = ['account', '前連結会計年度(2018年3月31日)_unit', '前連結会計年度(2018年3月31日)', ''
-            , '当連結会計年度(2019年3月31日)_unit', '当連結会計年度(2019年3月31日)']
-        df["前連結会計年度(2018年3月31日)_unit"] = df["前連結会計年度(2018年3月31日)"].apply(lambda x: get_unit(x))
-        df["当連結会計年度(2019年3月31日)_unit"] = df["当連結会計年度(2019年3月31日)"].apply(lambda x: get_unit(x))
+    # elif ecode == "E04149":
+    #     df.columns = ['account', '前連結会計年度(平成30年3月31日)_unit', '前連結会計年度(平成30年3月31日)', ''
+    #         , '当連結会計年度(平成31年3月31日)_unit', '当連結会計年度(平成31年3月31日)']
+    #     df["前連結会計年度(平成30年3月31日)_unit"] = df["前連結会計年度(平成30年3月31日)"].apply(lambda x: get_unit(x))
+    #     df["当連結会計年度(平成31年3月31日)_unit"] = df["当連結会計年度(平成31年3月31日)"].apply(lambda x: get_unit(x))
+    # elif ecode == "E05017":
+    #     df.columns = ['account', '前連結会計年度(2018年3月31日)_unit', '前連結会計年度(2018年3月31日)', ''
+    #         , '当連結会計年度(2019年3月31日)_unit', '当連結会計年度(2019年3月31日)']
+    #     df["前連結会計年度(2018年3月31日)_unit"] = df["前連結会計年度(2018年3月31日)"].apply(lambda x: get_unit(x))
+    #     df["当連結会計年度(2019年3月31日)_unit"] = df["当連結会計年度(2019年3月31日)"].apply(lambda x: get_unit(x))
+    elif ecode in ["E04149", "E05017", "E02244", "E05121"]:
+        df.columns.values[1], df.columns.values[2] = df.columns.values[2], df.columns.values[1]
+        df.columns.values[-1], df.columns.values[-2] = df.columns.values[-2], df.columns.values[-1]
+        df.iloc[:, 1] = df.iloc[:, -2].apply(lambda x: get_unit(x))
+        df.iloc[:, -2] = df.iloc[:, -2].apply(lambda x: get_unit(x))
+    # その他
     elif ecode == "E01859":
         df.columns = ['account', '', '前連結会計年度(2018年3月31日)_unit', '前連結会計年度(2018年3月31日)', ''
             , '', '当連結会計年度(2019年3月31日)_unit', '当連結会計年度(2019年3月31日)', '']
