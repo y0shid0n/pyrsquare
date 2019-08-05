@@ -132,6 +132,8 @@ def modify_colname_individual(table_list):
     """
     # リストの各要素をカウント
     col_num_list = [len(i) for i in table_list]
+    # カラム名になる1行目の空白文字を削除
+    table_list[0] = [i.strip() for i in table_list[0]]
 
     # 各パターンごとにカラム名となる部分を修正する
     if max(col_num_list) == 3 and len(table_list[0]) == 2:
@@ -311,7 +313,7 @@ def sep_unit(df, col):
     指定したカラムにある単位は削除して数値に変換する
     """
     # 単位のカラムのカラム名
-    col_unit = col + "_unit"
+    col_unit = col.strip() + "_unit"
 
     # 出力用のdf
     df_output = df.copy()
