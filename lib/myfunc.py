@@ -183,6 +183,47 @@ def modify_colname_individual(table_list):
 
     return result_df
 
+def modify_df_individual(df, ecode):
+    """
+    個別のDataFrameを修正する
+    ある程度パターンがわかったら汎用的に書きたい
+    """
+    if ecode == "E04196":
+        df.columns = ["account", "前連結会計年度(平成30年3月31日)", "前連結会計年度(平成30年3月31日)_unit"
+            , "当連結会計年度(平成31年3月31日)" ,"当連結会計年度(平成31年3月31日)_unit"]
+    elif ecode == "E00067":
+        df.columns = ["account", "前連結会計年度(2018年3月31日)", "前連結会計年度(2018年3月31日)_unit"
+            , "当連結会計年度(2019年3月31日)", "当連結会計年度(2019年3月31日)_unit"]
+    elif ecode == "E26332":
+        df.columns = ["account", "前連結会計年度(2018年3月31日)", "前連結会計年度(2018年3月31日)_unit"
+            , "当連結会計年度(2019年3月31日)", "当連結会計年度(2019年3月31日)_unit"]
+    # 列数合ってない方で括弧がないレアパターンだったので個別対応
+    elif ecode == "E02089":
+        df.columns = ['account', 'blank1', '前連結会計年度(2018年3月31日)', '前連結会計年度(2018年3月31日)_unit'
+            , 'blank2', '', '当連結会計年度(2019年3月31日)', '当連結会計年度(2019年3月31日)_unit']
+    # 値の列と単位の列が逆、単位自体は分かれていなかったので個別対応
+    elif ecode == "E04149":
+        df.columns = ['account', '前連結会計年度(平成30年3月31日)_unit', '前連結会計年度(平成30年3月31日)', ''
+            , '当連結会計年度(平成31年3月31日)_unit', '当連結会計年度(平成31年3月31日)']
+        df["前連結会計年度(平成30年3月31日)_unit"] = df["前連結会計年度(平成30年3月31日)"].apply(lambda x: get_unit(x))
+        df["当連結会計年度(平成31年3月31日)_unit"] = df["当連結会計年度(平成31年3月31日)"].apply(lambda x: get_unit(x))
+    elif ecode == "E05017":
+        df.columns = ['account', '前連結会計年度(2018年3月31日)_unit', '前連結会計年度(2018年3月31日)', ''
+            , '当連結会計年度(2019年3月31日)_unit', '当連結会計年度(2019年3月31日)']
+        df["前連結会計年度(2018年3月31日)_unit"] = df["前連結会計年度(2018年3月31日)"].apply(lambda x: get_unit(x))
+        df["当連結会計年度(2019年3月31日)_unit"] = df["当連結会計年度(2019年3月31日)"].apply(lambda x: get_unit(x))
+    elif ecode == "E01859":
+        df.columns = ['account', '', '前連結会計年度(2018年3月31日)_unit', '前連結会計年度(2018年3月31日)', ''
+            , '', '当連結会計年度(2019年3月31日)_unit', '当連結会計年度(2019年3月31日)', '']
+        df.drop(df.index[0], inplace=True)
+        df["前連結会計年度(2018年3月31日)_unit"] == "千円"
+        df["当連結会計年度(2019年3月31日)_unit"] == "千円"
+    elif ecode == "E00774":
+        df["前連結会計年度(2018年3月31日)"] = df["前連結会計年度(2018年3月31日)"].str.replace("\(", "-")
+        df["当連結会計年度(2019年3月31日)"] = df["当連結会計年度(2019年3月31日)"].str.replace("\(", "-")
+
+    return df
+
 def get_unit(str):
     """
     値の文字列から単位を取得する
@@ -240,7 +281,7 @@ def fill_unit(Series_unit):
     """
     # 単位のカラムをリストにする
     # 同上を示す不要な文字列は削除
-    unit_list_tmp = list(Series_unit.str.replace("〃", "").replace("－", "").replace("―", "").str.strip())
+    unit_list_tmp = list(Series_unit.str.replace("〃", "").str.replace("\(", "").str.replace("\)", "").str.replace("－", "").str.replace("―", "").str.strip())
     # 単位が存在するときに、次の要素が空文字だった場合はその単位で埋める
     for i in range(len(unit_list_tmp) - 1):
         if unit_list_tmp[i] == "":
