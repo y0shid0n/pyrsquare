@@ -81,6 +81,8 @@ for file in file_list:
 
     # tableをpd.DataFrameに変更
     table_list = myfunc.table_to_list(table)
+    # ToDo: リストの長さが変で後ろの処理で吸収できないものは、list_to_pdに渡す前に個別処理を行う
+    # nested listをdataframeに変換する
     df = myfunc.list_to_pd(table_list)
 
     # 単位が分かれていて列数が合っているものは単位のカラム名がないので例外処理
