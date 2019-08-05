@@ -221,6 +221,9 @@ def modify_df_individual(df, ecode):
     elif ecode == "E00774":
         df["前連結会計年度(2018年3月31日)"] = df["前連結会計年度(2018年3月31日)"].str.replace("\(", "-")
         df["当連結会計年度(2019年3月31日)"] = df["当連結会計年度(2019年3月31日)"].str.replace("\(", "-")
+    elif ecode == "E02123":
+        df.columns = ["blank1", "account", "前連結会計年度(2018年3月31日)", "前連結会計年度(2018年3月31日)_unit"
+            , "blank2", "当連結会計年度(2019年3月31日)", "当連結会計年度(2019年3月31日)_unit"]
 
     return df
 
