@@ -117,8 +117,8 @@ for file in file_list:
     df_output["fs_type"] = fs_type
     df_output["acc_standard"] = acc_standard
 
-    # 全カラムの前後にある空白文字を削除
-    df_output = df_output.applymap(lambda x: x.strip())
+    # 全カラムの前後にある空白文字を削除（文字列カラムのみ処理）
+    df_output = df_output.applymap(lambda x: x.strip() if type(x) is str else x)
 
     output_filename = "./output/parsed_csv/{}_{}_test.csv".format(ecode, fs_type)
     df_output.to_csv(output_filename, sep=",", index=False, encoding="utf-8")
