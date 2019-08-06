@@ -225,11 +225,13 @@ def modify_df_individual(df, ecode):
     elif ecode == "E01364":
         df.columns = ["account", "前連結会計年度(blank)", "当連結会計年度(blank)"]
     # 値の列と単位の列が逆、単位自体は分かれていなかったので個別対応
-    elif ecode in ["E04149", "E05017", "E02244", "E05121"]:
-        df.columns.values[1], df.columns.values[2] = df.columns.values[2], df.columns.values[1]
-        df.columns.values[-1], df.columns.values[-2] = df.columns.values[-2], df.columns.values[-1]
-        df.iloc[:, 1] = df.iloc[:, -2].apply(lambda x: get_unit(x))
-        df.iloc[:, -2] = df.iloc[:, -2].apply(lambda x: get_unit(x))
+    elif ecode in ["E04149", "E05017", "E02244", "E05121", "E02258"]:
+        colname_replace = list(df.columns)
+        colname_replace[1], colname_replace[2] = colname_replace[2], colname_replace[1]
+        colname_replace[-1], colname_replace[-2] = colname_replace[-2], colname_replace[-1]
+        df.columns = colname_replace
+        df.iloc[:, 1] = df.iloc[:, 2].apply(lambda x: get_unit(x))
+        df.iloc[:, -2] = df.iloc[:, -1].apply(lambda x: get_unit(x))
     # その他
     elif ecode == "E01859":
         df.columns = ['account', '', '前連結会計年度(2018年3月31日)_unit', '前連結会計年度(2018年3月31日)', ''
