@@ -206,6 +206,9 @@ def modify_df_individual(df, ecode):
             , 'blank2', '', '当連結会計年度(2019年3月31日)', '当連結会計年度(2019年3月31日)_unit']
     elif ecode == "E01135":
         df.columns = ["account", "前連結会計年度(2018年3月31日)", "当連結会計年度(2019年3月31日)"]
+    # 年度がないパターン
+    elif ecode == "E01364":
+        df.columns = ["account", "前連結会計年度(blank)", "当連結会計年度(blank)"]
     # 値の列と単位の列が逆、単位自体は分かれていなかったので個別対応
     elif ecode in ["E04149", "E05017", "E02244", "E05121"]:
         df.columns.values[1], df.columns.values[2] = df.columns.values[2], df.columns.values[1]
