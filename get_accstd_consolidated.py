@@ -17,8 +17,9 @@ file_list = data_path.glob("**/*.xbrl")
 # 出力ファイル名
 output_file = "./output/accstd_consolidated_all.csv"
 
-# 出力用のリスト
-#output_all = []
+# 1行目の出力
+with open(output_file, "w") as f:
+    f.write("ecode,acc_standard,cosolidated_flg\n")
 
 def get_result(file):
     # edinet codeの取得
@@ -34,18 +35,11 @@ def get_result(file):
     consolidated_flg = obj.get_data_by_context_ref("jpdei_cor:WhetherConsolidatedFinancialStatementsArePreparedDEI", "FilingDateInstant").get_value()
 
     # リストを作成してoutput_allに追加
-    #output_all.append([ecode, acc_std, consolidated_flg])
     result = [ecode, acc_std, consolidated_flg]
 
-    # メモリを空ける
-    del obj
-    gc.collect()
-
-    return result
+    with open(output_file, "a") as f:
+        f.write(",".join(result) + "\n")
 
 # 全ファイルを実行
-output_all = [get_result(i) for i in file_list]
+output  = [get_result(i) for i in file_list]
 
-# output_allをcsvに出力
-output_df = pd.DataFrame(output_all, columns = ["ecode", "acc_standard", "consolidated_flg"])
-output_df.to_csv(output_file, sep="\t", index=False, encoding="utf-8")
