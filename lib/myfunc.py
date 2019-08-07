@@ -33,14 +33,23 @@ def get_html(obj, key, context_ref):
 
     return soup
 
-# def get_table(soup):
-#     """
-#     BeautifulSoupでパースしたhtmlからテーブルを取得
-#     """
-#     # テーブルを指定（たぶん1つめだけでよさげ）
-#     table = soup.findAll("table")[0]
-#
-#     return table
+def get_string(soup, pattern):
+    """
+    html内の特定文字列の有無を返す関数
+    """
+    if soup is None:
+        result_list = []
+    else:
+        result_list = soup.find_all(string = pattern)
+
+    if len(result_list) == 0:
+        result = 0
+    elif len(result_list) >= 2:
+        result = 2
+    else:
+        result = 1
+
+    return result
 
 def table_to_list(table):
     """
