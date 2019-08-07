@@ -3,6 +3,7 @@
 import pandas as pd
 from edinet_xbrl.edinet_xbrl_parser import EdinetXbrlParser
 from pathlib import Path
+import gc
 from lib import myfunc
 
 # init parser
@@ -17,9 +18,9 @@ file_list = data_path.glob("**/*.xbrl")
 output_file = "./output/accstd_consolidated_all.csv"
 
 # 出力用のリスト
-output_all = []
+#output_all = []
 
-for file in file_list:
+def get_result(file):
     # edinet codeの取得
     ecode = myfunc.get_ecode(str(file))
 
@@ -33,7 +34,17 @@ for file in file_list:
     consolidated_flg = obj.get_data_by_context_ref("jpdei_cor:WhetherConsolidatedFinancialStatementsArePreparedDEI", "FilingDateInstant").get_value()
 
     # リストを作成してoutput_allに追加
-    output_all.append([ecode, acc_std, consolidated_flg])
+    #output_all.append([ecode, acc_std, consolidated_flg])
+    result = [ecode, acc_std, consolidated_flg]
+
+    # メモリを空ける
+    del obj
+    gc.collect()
+
+    return result
+
+# 全ファイルを実行
+output_all = [get_result(i) for i in file_list]
 
 # output_allをcsvに出力
 output_df = pd.DataFrame(output_all, columns = ["ecode", "acc_standard", "consolidated_flg"])
