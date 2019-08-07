@@ -65,11 +65,11 @@ for file in file_list:
     # 会計基準の取得
     acc_standard = obj.get_data_by_context_ref("jpdei_cor:AccountingStandardsDEI", "FilingDateInstant").get_value()
 
-    # tableタグの抽出
-    table = myfunc.get_table(obj, target_key, context_ref)
+    # 該当箇所のhtmlをパース
+    soup = myfunc.get_html(obj, target_key, context_ref)
 
-    # tableがない場合はスキップ
-    if table is None:
+    # tableタグの抽出
+    if soup is None:
         # ToDo: loggingでlog出力したい
         print("There is no table.")
         # 空ファイルを出しておく（python3.4以降のみ対応）
@@ -78,6 +78,8 @@ for file in file_list:
         with open(checked_file, "a", encoding="UTF-8") as f:
             f.write(file.name + "\n")
         continue
+    else:
+        table = soup.findAll("table")[0]
 
     # tableをpd.DataFrameに変更
     table_list = myfunc.table_to_list(table)

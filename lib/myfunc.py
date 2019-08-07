@@ -17,9 +17,9 @@ def get_ecode(filename):
     ecode = re.search("(?<=_)E[0-9]+(?=-)", filename)
     return ecode.group(0)
 
-def get_table(obj, key, context_ref):
+def get_html(obj, key, context_ref):
     """
-    ファイルから必要なtableを抜き出す
+    ファイルから必要な部分のhtmlをパース
     """
     # keyとcontext_refから該当箇所を取得
     current_year_assets = obj.get_data_by_context_ref(key, context_ref)
@@ -31,9 +31,16 @@ def get_table(obj, key, context_ref):
     # htmlをパース
     soup = BeautifulSoup(current_year_assets.get_value(), 'html.parser')
 
-    # テーブルを指定（たぶん1つめだけでよさげ）
-    table = soup.findAll("table")[0]
-    return table
+    return soup
+
+# def get_table(soup):
+#     """
+#     BeautifulSoupでパースしたhtmlからテーブルを取得
+#     """
+#     # テーブルを指定（たぶん1つめだけでよさげ）
+#     table = soup.findAll("table")[0]
+#
+#     return table
 
 def table_to_list(table):
     """
