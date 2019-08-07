@@ -63,7 +63,7 @@ for file in file_list:
     obj = parser.parse_file(file)
 
     # 会計基準の取得
-    acc_standard = myfunc.get_acc_standard(obj)
+    acc_standard = obj.get_data_by_context_ref("jpdei_cor:AccountingStandardsDEI", "FilingDateInstant").get_value()
 
     # tableタグの抽出
     table = myfunc.get_table(obj, target_key, context_ref)

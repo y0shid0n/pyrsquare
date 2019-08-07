@@ -17,13 +17,6 @@ def get_ecode(filename):
     ecode = re.search("(?<=_)E[0-9]+(?=-)", filename)
     return ecode.group(0)
 
-def get_acc_standard(obj):
-    """
-    ファイルから会計基準を取得する
-    """
-    acc_standard = obj.get_data_by_context_ref("jpdei_cor:AccountingStandardsDEI", "FilingDateInstant").get_value()
-    return acc_standard
-
 def get_table(obj, key, context_ref):
     """
     ファイルから必要なtableを抜き出す
