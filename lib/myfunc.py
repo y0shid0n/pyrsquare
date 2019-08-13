@@ -107,6 +107,12 @@ def list_to_pd(result_list):
         # 前期データがない場合は前期データを作成する
         if len(result_df.columns) == 2:
             result_df["前連結会計年度(brank)"] = ""
+
+    # 2行パターンの処理
+    elif max(col_num_list) > col_num_list[0] and max(col_num_list) > col_num_list[1]):
+        result_df = modify_list_individual(result_list)
+
+    # 1行パターンの処理
     else:
         # 単位のカラム名が分かれている場合はカラム名をつける
         # この辺はうまくいかない可能性がありそう（どこに空白列があるかがわからないので）
@@ -120,6 +126,42 @@ def list_to_pd(result_list):
     result_df.columns = ["account"] + list(result_df.columns)[1:]
     #result_df["account"] = result_df["account"].str.strip()
     result_df["account"] = result_df["account"].apply(lambda x: jaconv.z2h(x.strip(), digit=True, ascii=True, kana=False))
+
+    return result_df
+
+def modify_list_individual(table_list):
+    """
+    上2行の要素数が少ないパターンを処理する
+    """
+    check_empty = [True if i.strip() == "" else False for i in table_list[1]]
+    check_unit = [True if re.search(".*単位.*", i) else False for i in table_list[0]]
+    check_year = [True if re.search(".*年.*月.*日", i) else False for i in table_list[1]]
+
+    # 2行目が全て空の場合
+    if all(check_empty):
+        table_list.pop(1)
+    # 1行目に単位がある場合
+    elif any(check_unit):
+        unit = "".joun(check_unit).replace("単位").strip()
+        table_list = table_list[1:]
+    # カラム名が2行に分かれている場合
+    elif len(table_list[0]) == len(table_list[1]) and any(check_year):
+        table_list[1] = [i + j for i, j in zip(table_list[0], table_list[1])]
+        table_list = table_list[1:]
+
+    # とりあえず差が2のものだけを想定
+    # "年度"を含む要素のindexのリストを取得
+    value_index_list = [i for i, value in enumerate(table_list[0]) if re.search("年度", value)]
+    # そのindexの後ろに、その要素+"_unit"の要素を入れる
+    table_list[0].insert(value_index_list[0] + 1, table_list[0][value_index_list[0]] + "_unit")
+    table_list[0].insert(value_index_list[1] + 2, table_list[0][value_index_list[1] + 1] + "_unit")
+
+    if any(check_unit):
+        # 1行目から取得した単位を入れる
+        table_list[2][[value_index_list[0]] + "_unit"] = unit
+        table_list[2][[value_index_list[1] + 1] + "_unit"] = unit
+
+    result_df = pd.DataFrame(table_list[1:], columns=table_list[0])
 
     return result_df
 
