@@ -38,6 +38,9 @@ file_list = data_path.glob("*.xbrl")
 # 処理済みとの差分
 file_list = [i for i in file_list if i.name not in checked_file_list]
 
+# 1つ目のテーブルに単位のみが存在する場合の判定用フラグ
+unit_tmp_flg = 0
+
 # どっちがどっちか要確認
 # 単体 or 連結のkeyの辞書
 # fs_dict = {"non-consolidated": "jpcrp_cor:NotesTaxEffectAccountingFinancialStatementsTextBlock"
@@ -83,7 +86,32 @@ for file in file_list:
 
     # tableをpd.DataFrameに変更
     table_list = myfunc.table_to_list(table)
+
+    # 1つ目のtableタグで何も取れなかった時の対応
+    if len(table_list) == 0:
+        table = soup.findAll("table")[1]
+        table_list = myfunc.table_to_list(table)
+    # tableタグが1行目で切れている場合の対応
+    if len(table_list) == 1:
+        check_title = [True if re.search(".*繰延税金.*原因.*内訳", i) else False for i in table_list[0]]
+        check_unit = [True if re.search(".*単位.*", i) else False for i in table_list[0]]
+        check_year = [True if re.search(".*年.*月.*日", i) else False for i in table_list[0]]
+        if any(check_title):
+            table_list = myfunc.table_to_list(soup.findAll("table")[1])
+        elif any(check_unit):
+            unit_tmp_flg = 1
+            unit_tmp = "".join(table_list[0]).replace("単位", "").replace(":", "").replace("：", "").strip()
+            table_list = myfunc.table_to_list(soup.findAll("table")[1])
+        elif any(check_year):
+            table_list_tmp = myfunc.table_to_list(soup.findAll("table")[1])
+            table_list.extend(table_list_tmp)
+
     # ToDo: リストの長さが変で後ろの処理で吸収できないものは、list_to_pdに渡す前に個別処理を行う
+    if ecode == "E04346":
+        table_list[0] = [i for i in table_list[0] if i != ""]
+        table_list[0].insert(0, "account")
+        table_list[0].insert(-1, "blank")
+
     # nested listをdataframeに変換する
     df = myfunc.list_to_pd(table_list)
 
@@ -106,6 +134,11 @@ for file in file_list:
 
     # カラム名から期間の情報を抽出して別のカラムにし、カラム名からは期間を削除
     df_output = myfunc.sep_period(df)
+
+    # 1個目のテーブルに単位のみがあった場合の処理
+    if unit_tmp_flg == 1:
+        df_output["cur_value_unit"] = unit_tmp
+        df_output["prev_value_unit"] = unit_tmp
 
     # 単位のカラムの補完と値の数値変換
     df_output.loc[:, df_output.columns.str.contains("_unit")] = df_output.loc[:, df_output.columns.str.contains("_unit")].apply(myfunc.fill_unit)

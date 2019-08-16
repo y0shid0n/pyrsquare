@@ -74,6 +74,11 @@ def table_to_list(table):
             + i.count("（繰延税金資産）") + i.count("（繰延税金負債）")\
             + i.count("(繰延税金資産)") + i.count("(繰延税金負債)") != len(i)]
 
+    # 削除した結果何もなくなった場合は空のリストを返す
+    if result_list == []:
+        pprint(result_list)
+        return result_list
+
     # 最後に表示方法の変更が入っていたら削除
     if "表示方法の変更" in result_list[-1][0]:
         result_list = result_list[:-1]
@@ -452,8 +457,8 @@ def sep_period(df):
     # カラム名から期間情報を削除して、連結と単体の表記揺れを統一
     #col_list = [re.sub("末|\(.*\d+年\d+月\d+日\)", "", i) for i in df_output.columns]
     col_list = [i.replace(cur_period_tmp, "").replace(prev_period_tmp, "") for i in df_output.columns]
-    col_list = [re.sub("^当.+年度", "cur_value", i) for i in col_list]
-    col_list = [re.sub("^前.+年度", "prev_value", i) for i in col_list]
+    col_list = [re.sub("^当.+(年度|末)", "cur_value", i) for i in col_list]
+    col_list = [re.sub("^前.+(年度|末)", "prev_value", i) for i in col_list]
     df_output.columns = col_list
 
     return df_output
