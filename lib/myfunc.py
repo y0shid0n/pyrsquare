@@ -68,8 +68,12 @@ def table_to_list(table):
             csvRow.append(tmp)
         result_list.append(csvRow)
 
-    # 全て空の行は削除
-    result_list = [i for i in result_list if i.count("") != len(i)]
+    # 全て空または"繰延税金資産"のみまたは"繰延税金負債"のみの行は削除
+    result_list = [i for i in result_list\
+        if i.count("") + i.count("繰延税金資産") + i.count("繰延税金負債")\
+            + i.count("（繰延税金資産）") + i.count("（繰延税金負債）")\
+            + i.count("(繰延税金資産)") + i.count("(繰延税金負債)") != len(i)]
+
     # 最後に表示方法の変更が入っていたら削除
     if "表示方法の変更" in result_list[-1][0]:
         result_list = result_list[:-1]
@@ -80,6 +84,24 @@ def table_to_list(table):
     pprint(result_list)
     return(result_list)
 
+def delete_empty_columns(result_df):
+    """
+    全て空文字かつカラム名も空文字の列を削除
+    """
+    new_colname = []
+    for colname, item in result_df.iteritems():
+        if all([x == "" for x in list(item)]) and colname == "":
+            new_colname.append("drop_tmp")
+            #result_df.columns = list(result_df.columns)[:-1] + ["drop_tmp"]
+        else:
+            new_colname.append(colname)
+    # カラム名を書き換えて、"drop_tmp"があれば削除
+    result_df.columns = new_colname
+    if "drop_tmp" in result_df.columns:
+        result_df.drop("drop_tmp", axis=1, inplace=True)
+
+    return result_df
+
 def list_to_pd(result_list):
     """
     htmlのtableタグをパースして作成したリストをpd.DataFrameに変換する
@@ -88,28 +110,35 @@ def list_to_pd(result_list):
     # 列数が合うものは単位がわかれていない（一部例外あり）
     col_num_list = [len(i) for i in result_list]
     print(col_num_list)
+
     if col_num_list.count(max(col_num_list)) == len(col_num_list):
-        # 単位が分かれていなければそのまま
+        check_unit = [True if re.search(".*単位.*", i) else False for i in result_list[0]]
+        check_year = [True if re.search(".*年.*月.*日", i) else False for i in result_list[1]]
+        # 単位が1行目にあるパターンの処理
+        if any(check_unit):
+            unit_tmp = "".join(result_list[0]).replace("単位", "").strip()
+            result_list = result_list[1:]
+        # 年度が2行目にあるパターンの処理
+        elif any(check_year):
+            result_list[1] = [i + j for i, j in zip(result_list[0], result_list[1])]
+            result_list = result_list[1:]
+        # 単位が分かれていなければそのままDataFrameに
         result_df = pd.DataFrame(result_list[1:], columns=result_list[0])
         # 全て空文字かつカラム名も空文字の列を削除
-        new_colname = []
-        for colname, item in result_df.iteritems():
-            if all([x == "" for x in list(item)]) and colname == "":
-                new_colname.append("drop_tmp")
-                #result_df.columns = list(result_df.columns)[:-1] + ["drop_tmp"]
-            else:
-                new_colname.append(colname)
-        # カラム名を書き換えて、"drop_tmp"があれば削除
-        result_df.columns = new_colname
-        if "drop_tmp" in result_df.columns:
-            result_df.drop("drop_tmp", axis=1, inplace=True)
+        result_df = delete_empty_columns(result_df)
 
         # 前期データがない場合は前期データを作成する
         if len(result_df.columns) == 2:
             result_df["前連結会計年度(brank)"] = ""
 
+        # 1行目に単位があった場合は単位のカラムを追加
+        if any(check_unit):
+            # 1行目から取得した単位を入れる
+            result_df["前連結会計年度(brank)"] = unit_tmp
+            result_df["前連結会計年度(brank)_unit"] = unit_tmp
+
     # 2行パターンの処理
-    elif max(col_num_list) > col_num_list[0] and max(col_num_list) > col_num_list[1]):
+    elif max(col_num_list) > col_num_list[0] and max(col_num_list) > col_num_list[1]:
         result_df = modify_list_individual(result_list)
 
     # 1行パターンの処理
@@ -117,6 +146,9 @@ def list_to_pd(result_list):
         # 単位のカラム名が分かれている場合はカラム名をつける
         # この辺はうまくいかない可能性がありそう（どこに空白列があるかがわからないので）
         result_df = modify_colname_individual(result_list)
+
+    # 全て空文字かつカラム名も空文字の列を削除
+    result_df = delete_empty_columns(result_df)
 
     # カラム名の全角半角の揺れをなくす
     # カラム名の先頭に空白文字がある場合があるので削除
@@ -142,7 +174,7 @@ def modify_list_individual(table_list):
         table_list.pop(1)
     # 1行目に単位がある場合
     elif any(check_unit):
-        unit = "".joun(check_unit).replace("単位").strip()
+        unit = "".join(table_list[0]).replace("単位", "").strip()
         table_list = table_list[1:]
     # カラム名が2行に分かれている場合
     elif len(table_list[0]) == len(table_list[1]) and any(check_year):
@@ -158,8 +190,10 @@ def modify_list_individual(table_list):
 
     if any(check_unit):
         # 1行目から取得した単位を入れる
-        table_list[2][[value_index_list[0]] + "_unit"] = unit
-        table_list[2][[value_index_list[1] + 1] + "_unit"] = unit
+        table_list[2] = [unit if i == table_list[2][value_index_list[0]] + "_unit" else i for i in table_list[2]]
+        #table_list[2][[value_index_list[0]] + "_unit"] = unit
+        table_list[2] = [unit if i == table_list[2][value_index_list[1] + 1] + "_unit" else i for i in table_list[2]]
+        #table_list[2][[value_index_list[1] + 1] + "_unit"] = unit
 
     result_df = pd.DataFrame(table_list[1:], columns=table_list[0])
 
@@ -196,6 +230,9 @@ def modify_colname_individual(table_list):
         table_list[0].append(table_list[0][-1] + "_unit")
         result_df = pd.DataFrame(table_list[1:], columns=table_list[0])
         result_df[table_list[0][1] + "_unit"] = result_df[table_list[0][1]].apply(lambda x: get_unit(x))
+    elif max(col_num_list) == 4 and len(table_list[0]) == 3:
+        table_list[0].insert(1, "account")
+        result_df = pd.DataFrame(table_list[1:], columns=table_list[0])
     elif max(col_num_list) == 9 and len(table_list[0]) == 3:
         table_list[0].insert(2, table_list[0][1] + "_unit")
         table_list[0].append(table_list[0][-1] + "_unit")
@@ -334,7 +371,10 @@ def get_value(account, value_str):
     accountが()で囲われているときは、()の除外処理も行う
     """
     # 数値のパターン
-    ptn = re.search(".*[0-9]+(?=[^0-9]*$)", value_str)
+    if value_str is None:
+        ptn = None
+    else:
+        ptn = re.search(".*[0-9]+(?=[^0-9]*$)", value_str)
 
     # accountカラムが()で囲われているかどうか
     acc_bracket = re.search("^\(.+\)$", account)
