@@ -116,7 +116,7 @@ def list_to_pd(result_list):
         check_year = [True if re.search(".*年.*月.*日", i) else False for i in result_list[1]]
         # 単位が1行目にあるパターンの処理
         if any(check_unit):
-            unit_tmp = "".join(result_list[0]).replace("単位", "").strip()
+            unit_tmp = "".join(result_list[0]).replace("単位", "").replace(":", "").replace("：", "").strip()
             result_list = result_list[1:]
         # 年度が2行目にあるパターンの処理
         elif any(check_year):
@@ -174,7 +174,7 @@ def modify_list_individual(table_list):
         table_list.pop(1)
     # 1行目に単位がある場合
     elif any(check_unit):
-        unit = "".join(table_list[0]).replace("単位", "").strip()
+        unit = "".join(table_list[0]).replace("単位", "").replace(":", "").replace("：", "").strip()
         table_list = table_list[1:]
     # カラム名が2行に分かれている場合
     elif len(table_list[0]) == len(table_list[1]) and any(check_year):
