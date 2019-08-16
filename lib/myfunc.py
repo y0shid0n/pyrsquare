@@ -134,8 +134,8 @@ def list_to_pd(result_list):
         # 1行目に単位があった場合は単位のカラムを追加
         if any(check_unit):
             # 1行目から取得した単位を入れる
-            result_df["前連結会計年度(brank)"] = unit_tmp
-            result_df["前連結会計年度(brank)_unit"] = unit_tmp
+            result_df["cur_value_unit"] = unit_tmp
+            result_df["prev_value_unit"] = unit_tmp
 
     # 2行パターンの処理
     elif max(col_num_list) > col_num_list[0] and max(col_num_list) > col_num_list[1]:
