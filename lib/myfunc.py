@@ -26,7 +26,6 @@ def skip_get_data(target_file, checked_file, output_file):
     # checked_fileに書き込み
     with open(checked_file, "a", encoding="UTF-8") as f:
         f.write(target_file.name + "\n")
-    continue
 
 def get_html(obj, key, context_ref):
     """
