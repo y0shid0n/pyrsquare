@@ -73,7 +73,7 @@ for file in file_list:
     # edinet codeが非上場会社の場合はスキップ
     if ecode not in listed_company:
         print("{} is not listed company.".format(ecode))
-        skip_get_data(file, checked_file, output_file)
+        myfunc.skip_get_data(file, checked_file, output_file)
         continue
 
     # xbrlをパースしたオブジェクトを作成
@@ -89,7 +89,7 @@ for file in file_list:
     if soup is None:
         # ToDo: loggingでlog出力したい
         print("There is no table.")
-        skip_get_data(file, checked_file, output_file)
+        myfunc.skip_get_data(file, checked_file, output_file)
         continue
     else:
         table = soup.findAll("table")[0]

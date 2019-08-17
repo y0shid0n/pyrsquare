@@ -8,6 +8,7 @@ import numpy as np
 import jaconv
 from datetime import datetime as dt
 import sys
+from pathlib import Path
 from pprint import pprint
 
 def get_ecode(filename):
