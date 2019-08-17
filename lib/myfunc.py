@@ -17,6 +17,17 @@ def get_ecode(filename):
     ecode = re.search("(?<=_)E[0-9]+(?=-)", filename)
     return ecode.group(0)
 
+def skip_get_data(target_file, checked_file, output_file):
+    """
+    スキップ時の処理
+    """
+    # 空ファイルを出しておく（python3.4以降のみ対応）
+    Path(output_file).touch()
+    # checked_fileに書き込み
+    with open(checked_file, "a", encoding="UTF-8") as f:
+        f.write(target_file.name + "\n")
+    continue
+
 def get_html(obj, key, context_ref):
     """
     ファイルから必要な部分のhtmlをパース
@@ -282,6 +293,7 @@ def modify_df_individual(df, ecode):
     """
     個別のDataFrameを修正する
     ある程度パターンがわかったら汎用的に書きたい
+    ToDo: 2行パターンなどの処理で一部不要になったものがあるかもしれないので除外する
     """
     # カラム名の例外
     if ecode == "E04196":

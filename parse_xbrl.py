@@ -29,6 +29,11 @@ elif args[1] == "init":
 with open(checked_file, "r", encoding="UTF-8") as f:
     checked_file_list = [i.strip() for i in f.readlines()]
 
+# 会社リストの読み込み
+# 今回は上場会社のみを使用する
+company_list = pd.read_csv("./csv/company_list.tsv", sep="\t", encoding="utf-8")
+listed_company = list(company_list.query("取引所!='非上場'")["EDINETコード"])
+
 # init parser
 parser = EdinetXbrlParser()
 
@@ -62,6 +67,14 @@ for file in file_list:
     # edinet codeの取得
     ecode = myfunc.get_ecode(str(file))
 
+    # 出力ファイル名
+    output_file = "./output/parsed_csv/{}_{}_test.csv".format(ecode, fs_type)
+
+    # edinet codeが非上場会社の場合はスキップ
+    if ecode not in listed_company:
+        print("{} is not listed company.".format(ecode))
+        skip_get_data(file, checked_file, output_file)
+
     # xbrlをパースしたオブジェクトを作成
     obj = parser.parse_file(file)
 
@@ -75,12 +88,7 @@ for file in file_list:
     if soup is None:
         # ToDo: loggingでlog出力したい
         print("There is no table.")
-        # 空ファイルを出しておく（python3.4以降のみ対応）
-        Path("./output/parsed_csv/{}_{}_test.csv".format(ecode, fs_type)).touch()
-        # checked_fileに書き込み
-        with open(checked_file, "a", encoding="UTF-8") as f:
-            f.write(file.name + "\n")
-        continue
+        skip_get_data(file, checked_file, output_file)
     else:
         table = soup.findAll("table")[0]
 
@@ -155,8 +163,7 @@ for file in file_list:
     # 全カラムの前後にある空白文字を削除（文字列カラムのみ処理）
     df_output = df_output.applymap(lambda x: x.strip() if type(x) is str else x)
 
-    output_filename = "./output/parsed_csv/{}_{}_test.csv".format(ecode, fs_type)
-    df_output.to_csv(output_filename, sep=",", index=False, encoding="utf-8")
+    df_output.to_csv(output_file, sep=",", index=False, encoding="utf-8")
 
     # 処理済みファイルに書き込み
     with open(checked_file, "a", encoding="UTF-8") as f:
