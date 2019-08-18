@@ -30,9 +30,9 @@ with open(checked_file, "r", encoding="UTF-8") as f:
     checked_file_list = [i.strip() for i in f.readlines()]
 
 # 会社リストの読み込み
-# 今回は上場会社のみを使用する
+# 今回は会社リストに存在する会社のうち、上場会社のみを使用する
 company_list = pd.read_csv("./csv/company_list.tsv", sep="\t", encoding="utf-8")
-not_listed_company = list(company_list.query("取引所=='非上場'")["EDINETコード"])
+target_company = list(company_list.query("取引所!='非上場'")["EDINETコード"])
 
 # init parser
 parser = EdinetXbrlParser()
@@ -70,9 +70,9 @@ for file in file_list:
     # 出力ファイル名
     output_file = "./output/parsed_csv/{}_{}_test.csv".format(ecode, fs_type)
 
-    # edinet codeが非上場会社の場合はスキップ
-    if ecode in not_listed_company:
-        print("{} is not listed company.".format(ecode))
+    # edinet codeが分析対象リストにない場合はスキップ
+    if ecode not in target_company:
+        print("{} is not target company.".format(ecode))
         myfunc.skip_get_data(file, checked_file, output_file)
         continue
 
