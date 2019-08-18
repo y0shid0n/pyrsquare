@@ -165,6 +165,9 @@ for file in file_list:
     # 全カラムの前後にある空白文字を削除（文字列カラムのみ処理）
     df_output = df_output.applymap(lambda x: x.strip() if type(x) is str else x)
 
+    # accountは間にスペースが入っている場合があるので削除
+    df_output["account"] = df_output["account"].apply(lambda x: re.sub(r"\s+", "", x))
+
     df_output.to_csv(output_file, sep=",", index=False, encoding="utf-8")
 
     # 処理済みファイルに書き込み
