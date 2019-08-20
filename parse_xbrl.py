@@ -43,12 +43,6 @@ file_list = data_path.glob("*.xbrl")
 # 処理済みとの差分
 file_list = [i for i in file_list if i.name not in checked_file_list]
 
-# 1つ目のテーブルに単位のみが存在する場合の判定用フラグ
-unit_tmp_flg = 0
-
-# 何番目のtableタグまで拾ったかのカウント
-table_cnt = 0
-
 # どっちがどっちか要確認
 # 単体 or 連結のkeyの辞書
 # fs_dict = {"non-consolidated": "jpcrp_cor:NotesTaxEffectAccountingFinancialStatementsTextBlock"
@@ -67,6 +61,12 @@ context_ref = "CurrentYearDuration"
 # 出力はpickleとかにしたほうがいいかも
 for file in file_list:
     print(file)
+    # 1つ目のテーブルに単位のみが存在する場合の判定用フラグ
+    unit_tmp_flg = 0
+
+    # 何番目のtableタグまで拾ったかのカウント
+    table_cnt = 0
+
     # edinet codeの取得
     ecode = myfunc.get_ecode(str(file))
 
