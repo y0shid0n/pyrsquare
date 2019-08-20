@@ -127,7 +127,7 @@ for file in file_list:
 
     # 表の途中でtableタグが切れている場合の対応
     # table_list最後の行が"繰延税金資産合計"の場合は次も拾う
-    check_last = [True if re.sub("\s+", "", i) == "繰延税金資産合計" else False for i in table_list[0]]
+    check_last = [True if re.sub("\s+", "", i) == "繰延税金資産合計" else False for i in table_list[-1]]
     if any(check_last):
         table_list_tmp = myfunc.table_to_list(soup.findAll("table")[table_cnt])
         table_list.extend(table_list_tmp)
