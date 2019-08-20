@@ -46,6 +46,9 @@ file_list = [i for i in file_list if i.name not in checked_file_list]
 # 1つ目のテーブルに単位のみが存在する場合の判定用フラグ
 unit_tmp_flg = 0
 
+# 何番目のtableタグまで拾ったかのカウント
+table_cnt = 0
+
 # どっちがどっちか要確認
 # 単体 or 連結のkeyの辞書
 # fs_dict = {"non-consolidated": "jpcrp_cor:NotesTaxEffectAccountingFinancialStatementsTextBlock"
@@ -93,6 +96,7 @@ for file in file_list:
         continue
     else:
         table = soup.findAll("table")[0]
+        table_cnt += 1
 
     # tableをpd.DataFrameに変更
     table_list = myfunc.table_to_list(table)
@@ -101,6 +105,8 @@ for file in file_list:
     if len(table_list) == 0:
         table = soup.findAll("table")[1]
         table_list = myfunc.table_to_list(table)
+        table_cnt += 1
+
     # tableタグが1行目で切れている場合の対応
     if len(table_list) == 1:
         check_title = [True if re.search(".*繰延税金.*原因.*内訳", i) else False for i in table_list[0]]
@@ -108,13 +114,24 @@ for file in file_list:
         check_year = [True if re.search(".*年.*月.*日", i) else False for i in table_list[0]]
         if any(check_title):
             table_list = myfunc.table_to_list(soup.findAll("table")[1])
+            table_cnt += 1
         elif any(check_unit):
             unit_tmp_flg = 1
             unit_tmp = "".join(table_list[0]).replace("単位", "").replace(":", "").replace("：", "").strip()
             table_list = myfunc.table_to_list(soup.findAll("table")[1])
+            table_cnt += 1
         elif any(check_year):
             table_list_tmp = myfunc.table_to_list(soup.findAll("table")[1])
             table_list.extend(table_list_tmp)
+            table_cnt += 1
+
+    # 表の途中でtableタグが切れている場合の対応
+    # table_list最後の行が"繰延税金資産合計"の場合は次も拾う
+    check_last = [True if re.sub("\s+", "", i) == "繰延税金資産合計" else False for i in table_list[0]]
+    if any(check_last):
+        table_list_tmp = myfunc.table_to_list(soup.findAll("table")[table_cnt])
+        table_list.extend(table_list_tmp)
+        table_cnt += 1
 
     # ToDo: リストの長さが変で後ろの処理で吸収できないものは、list_to_pdに渡す前に個別処理を行う
     if ecode == "E04346":
