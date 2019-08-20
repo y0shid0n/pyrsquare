@@ -130,6 +130,10 @@ for file in file_list:
     check_last = [True if re.sub("\s+", "", i) == "繰延税金資産合計" else False for i in table_list[-1]]
     if any(check_last):
         table_list_tmp = myfunc.table_to_list(soup.findAll("table")[table_cnt])
+        # table_list_tmpの頭に年度の行があった場合は削除
+        check_year_2nd = [True if re.search(".*年.*月.*日", i) else False for i in table_list_tmp[0]]
+        if any(check_year_2nd):
+            table_list_tmp = table_list_tmp[1:]
         table_list.extend(table_list_tmp)
         table_cnt += 1
 
