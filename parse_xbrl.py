@@ -128,7 +128,7 @@ for file in file_list:
     # 表の途中でtableタグが切れている場合の対応
     # table_list最後の行が"繰延税金資産合計"の場合は次も拾う
     check_last = [True if re.sub("\s+", "", i) == "繰延税金資産合計" else False for i in table_list[-1]]
-    if any(check_last):
+    if any(check_last) and ecode not in ["E32161", "E05283", "E34165", "E00471", "E05674", "E05432", "E30130", "E05302", "E05543", "E04804", "E00288", "E30993", "E33238", "E32159", "E05573", "E03728"]:
         table_list_tmp = myfunc.table_to_list(soup.findAll("table")[table_cnt])
         # table_list_tmpの頭に年度の行があった場合は削除
         check_year_2nd = [True if re.search(".*年.*月.*日", i) else False for i in table_list_tmp[0]]
