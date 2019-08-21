@@ -133,7 +133,8 @@ for file in file_list:
         , "E00288", "E30993", "E33238", "E32159", "E05573"
         , "E03728", "E32647", "E05593", "E01511", "E31054"
         , "E33247"]
-    if any(check_last) and ecode not in not_interrupted:
+    interrupted = ["E00926", "E01221", "E01539", "E04997"]
+    if (any(check_last) and ecode not in not_interrupted) or ecode in interrupted:
         table_list_tmp = myfunc.table_to_list(soup.findAll("table")[table_cnt])
         # table_list_tmpの頭に年度の行があった場合は削除
         check_year_2nd = [True if re.search(".*年.*月.*日", i) else False for i in table_list_tmp[0]]
@@ -141,6 +142,17 @@ for file in file_list:
             table_list_tmp = table_list_tmp[1:]
         table_list.extend(table_list_tmp)
         table_cnt += 1
+
+    # E02194は4分割されているので個別処理
+    # 3つ目のtableタグは1行目に年度の行が入っているので削除
+    if ecode == "E02194":
+        table_list_tmp = myfunc.table_to_list(soup.findAll("table")[1])
+        table_list.extend(table_list_tmp)
+        table_list_tmp = myfunc.table_to_list(soup.findAll("table")[2])
+        table_list_tmp = table_list_tmp[1:]
+        table_list.extend(table_list_tmp)
+        table_list_tmp = myfunc.table_to_list(soup.findAll("table")[3])
+        table_list.extend(table_list_tmp)
 
     # ToDo: リストの長さが変で後ろの処理で吸収できないものは、list_to_pdに渡す前に個別処理を行う
     if ecode == "E04346":
