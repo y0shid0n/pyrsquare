@@ -329,6 +329,12 @@ def modify_df_individual(df, ecode):
     # 年度がないパターン
     elif ecode == "E01364":
         df.columns = ["account", "前連結会計年度(blank)", "当連結会計年度(blank)"]
+    # 値の列と単位の列が逆、単位は分かれているのでそのまま
+    elif ecode in ["E01156"]:
+        colname_replace = list(df.columns)
+        colname_replace[1], colname_replace[2] = colname_replace[2], colname_replace[1]
+        colname_replace[-1], colname_replace[-2] = colname_replace[-2], colname_replace[-1]
+        df.columns = colname_replace
     # 値の列と単位の列が逆、単位自体は分かれていなかったので個別対応
     elif ecode in ["E04149", "E05017", "E02244", "E05121", "E02258"]:
         colname_replace = list(df.columns)
