@@ -98,7 +98,7 @@ for file in file_list:
         table = soup.findAll("table")[0]
         table_cnt += 1
 
-    # tableをpd.DataFrameに変更
+    # tableを2次元のリストに変更
     table_list = myfunc.table_to_list(table)
 
     # 1つ目のtableタグで何も取れなかった時の対応
@@ -159,6 +159,12 @@ for file in file_list:
         table_list[0] = [i for i in table_list[0] if i != ""]
         table_list[0].insert(0, "account")
         table_list[0].insert(-1, "blank")
+
+    # 後ろの表まで含まれているものは個別処理
+    if ecode == "E02161":
+        table_list = table_list[:21]
+    if ecode == "E02242":
+        table_list = table_list[:15]
 
     # nested listをdataframeに変換する
     df = myfunc.list_to_pd(table_list)
